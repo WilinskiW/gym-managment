@@ -102,7 +102,7 @@ public class SimpleInMemoryMembershipPlanRepository implements MembershipPlanRep
         if (entity.getId() == null) {
             entity.setId(idGenerator.getAndIncrement());
         }
-        db.putIfAbsent(idGenerator.get(), entity);
+        db.put(idGenerator.get(), entity);
         return entity;
     }
 

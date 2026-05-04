@@ -92,7 +92,7 @@ public class SimpleInMemoryGymRepository implements GymRepository {
         if (entity.getId() == null) {
             entity.setId(idGenerator.getAndIncrement());
         }
-        db.putIfAbsent(idGenerator.get(), entity);
+        db.put(idGenerator.get(), entity);
         return entity;
     }
 
