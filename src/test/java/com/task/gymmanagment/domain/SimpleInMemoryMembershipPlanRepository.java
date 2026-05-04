@@ -170,4 +170,11 @@ public class SimpleInMemoryMembershipPlanRepository implements MembershipPlanRep
     public Page<MembershipPlan> findAll(Pageable pageable) {
         return null;
     }
+
+    @Override
+    public List<MembershipPlan> findAllByGym(Gym gym) {
+        return db.values().stream()
+                .filter(p -> p.getGym().equals(gym)).
+                toList();
+    }
 }

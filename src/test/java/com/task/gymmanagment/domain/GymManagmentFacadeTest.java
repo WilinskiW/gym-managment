@@ -139,4 +139,49 @@ public class GymManagmentFacadeTest {
                 .isInstanceOf(GymNotFoundException.class)
                 .hasMessage("Gym with name Test gym not found");
     }
+
+    @Test
+    void should_list_all_membership_plans_for_existing_gym(){
+        // given
+        gymManagmentFacade.addGym(createAddGymRequest("Test gym"));
+
+        var membershipPlan1 = AddMembershipPlanRequestDto.builder()
+                .name("Test plan")
+                .type(MembershipType.BASIC)
+                .amount(BigDecimal.valueOf(100))
+                .currency("USD")
+                .duration(1)
+                .maxMembers(1)
+                .gymName("Test gym")
+                .build();
+
+        var membershipPlan2 = AddMembershipPlanRequestDto.builder()
+                .name("Test plan")
+                .type(MembershipType.BASIC)
+                .amount(BigDecimal.valueOf(500))
+                .currency("PLN")
+                .duration(1)
+                .maxMembers(1)
+                .gymName("Test gym")
+                .build();
+
+
+        gymManagmentFacade.addMembershipToGym(membershipPlan1);
+        gymManagmentFacade.addMembershipToGym(membershipPlan2);
+
+        // when
+        var membershipPlans = gymManagmentFacade.getGymAllMembershipPlans("Test gym");
+
+        // then
+        assertThat(membershipPlans).hasSize(2);
+        assertThat(membershipPlans.getFirst().currency()).isEqualTo("USD");
+        assertThat(membershipPlans.getLast().currency()).isEqualTo("PLN");
+    }
+
+    @Test
+    void should_throw_exception_when_gym_doesnt_exist_while_trying_to_list_membership_plans(){
+        assertThatThrownBy(() ->  gymManagmentFacade.getGymAllMembershipPlans("Test gym"))
+                .isInstanceOf(GymNotFoundException.class)
+                .hasMessage("Gym with name Test gym not found");
+    }
 }

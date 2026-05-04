@@ -3,6 +3,7 @@ package com.task.gymmanagment.domain;
 import com.task.gymmanagment.domain.dto.request.AddGymRequestDto;
 import com.task.gymmanagment.domain.dto.request.AddMembershipPlanRequestDto;
 import com.task.gymmanagment.domain.dto.response.GymInfoResponseDto;
+import com.task.gymmanagment.domain.dto.response.MembershipPlanInfoResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
@@ -81,6 +82,26 @@ class GymManagmentService {
                 .currency(request.currency())
                 .durationMonths(request.duration())
                 .maxMembers(request.maxMembers())
+                .build();
+    }
+
+    public List<MembershipPlanInfoResponseDto> findGymAllMembershipPlans(String gymName) {
+        var gym = gymRepository.findByName(gymName).orElseThrow(() -> new GymNotFoundException(gymName));
+
+        return membershipPlanRepository.findAllByGym(gym).stream()
+                .map(GymManagmentService::mapMembershipPlanToDto)
+                .toList();
+    }
+
+    private static MembershipPlanInfoResponseDto mapMembershipPlanToDto(MembershipPlan membershipPlan) {
+        return MembershipPlanInfoResponseDto.builder()
+                .id(membershipPlan.getId())
+                .name(membershipPlan.getName())
+                .type(membershipPlan.getType())
+                .amount(membershipPlan.getAmount())
+                .currency(membershipPlan.getCurrency())
+                .durationMonths(membershipPlan.getDurationMonths())
+                .maxMembers(membershipPlan.getMaxMembers())
                 .build();
     }
 }
