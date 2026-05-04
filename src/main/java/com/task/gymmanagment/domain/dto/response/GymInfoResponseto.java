@@ -1,9 +1,10 @@
-package com.task.gymmanagment.domain;
+package com.task.gymmanagment.domain.dto.response;
 
 import lombok.Builder;
 
 @Builder
-public record AddGymRequestDto(
+public record GymInfoResponseto(
+        Long id,
         String name,
         String address,
         String phoneNumber

@@ -1,5 +1,7 @@
 package com.task.gymmanagment.domain;
 
+import com.task.gymmanagment.domain.dto.request.AddGymRequestDto;
+import com.task.gymmanagment.domain.dto.response.GymInfoResponseto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -15,7 +17,7 @@ public class GymManagmentFacade {
         return managmentService.createGym(gymRequestDto);
     }
 
-    public List<GymInfoDto> getAllGyms() {
+    public List<GymInfoResponseto> getAllGyms() {
         return managmentService.findAllGyms();
     }
 }

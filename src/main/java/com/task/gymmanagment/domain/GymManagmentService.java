@@ -1,5 +1,7 @@
 package com.task.gymmanagment.domain;
 
+import com.task.gymmanagment.domain.dto.request.AddGymRequestDto;
+import com.task.gymmanagment.domain.dto.response.GymInfoResponseto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
@@ -40,14 +42,14 @@ class GymManagmentService {
                 .build();
     }
 
-    public List<GymInfoDto> findAllGyms() {
+    public List<GymInfoResponseto> findAllGyms() {
         return gymRepository.findAll().stream()
                 .map(GymManagmentService::mapGymToGymInfoDto)
                 .toList();
     }
 
-    private static GymInfoDto mapGymToGymInfoDto(Gym gym){
-        return GymInfoDto.builder()
+    private static GymInfoResponseto mapGymToGymInfoDto(Gym gym){
+        return GymInfoResponseto.builder()
                 .id(gym.getId())
                 .name(gym.getName())
                 .address(gym.getAddress())

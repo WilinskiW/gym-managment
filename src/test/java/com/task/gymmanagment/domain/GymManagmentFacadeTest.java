@@ -1,5 +1,7 @@
 package com.task.gymmanagment.domain;
 
+import com.task.gymmanagment.domain.dto.request.AddGymRequestDto;
+import com.task.gymmanagment.domain.dto.response.GymInfoResponseto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -82,7 +84,7 @@ public class GymManagmentFacadeTest {
         gymManagmentFacade.addGym(createAddGymRequest("Test gym 3"));
 
         // when
-        List<GymInfoDto> gyms = gymManagmentFacade.getAllGyms();
+        List<GymInfoResponseto> gyms = gymManagmentFacade.getAllGyms();
 
         // then
         assertThat(gyms).hasSize(3);
