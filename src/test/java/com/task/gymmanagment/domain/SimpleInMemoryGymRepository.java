@@ -103,6 +103,13 @@ public class SimpleInMemoryGymRepository implements GymRepository {
     }
 
     @Override
+    public Optional<Gym> findByName(String name) {
+        return  db.values().stream()
+                .filter(g -> g.getName().equals(name))
+                .findFirst();
+    }
+
+    @Override
     public Optional<Gym> findById(Long aLong) {
         return Optional.empty();
     }

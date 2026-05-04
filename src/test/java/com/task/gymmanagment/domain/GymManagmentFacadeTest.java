@@ -1,10 +1,12 @@
 package com.task.gymmanagment.domain;
 
 import com.task.gymmanagment.domain.dto.request.AddGymRequestDto;
-import com.task.gymmanagment.domain.dto.response.GymInfoResponseto;
+import com.task.gymmanagment.domain.dto.request.AddMembershipPlanRequestDto;
+import com.task.gymmanagment.domain.dto.response.GymInfoResponseDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -19,7 +21,11 @@ public class GymManagmentFacadeTest {
     }
 
     private static GymManagmentFacade createFacade() {
-        return new GymManagmentFacade(new GymManagmentService(new SimpleInMemoryGymRepository()));
+        return new GymManagmentFacade(new GymManagmentService
+                (
+                        new SimpleInMemoryGymRepository(),
+                        new SimpleInMemoryMembershipPlanRepository()
+                ));
     }
 
     @Test
@@ -48,12 +54,12 @@ public class GymManagmentFacadeTest {
         gymManagmentFacade.addGym(firstRequest);
 
         // then
-        assertThatThrownBy(() ->  gymManagmentFacade.addGym(secondRequest))
+        assertThatThrownBy(() -> gymManagmentFacade.addGym(secondRequest))
                 .isInstanceOf(GymAlreadyExistException.class)
                 .hasMessage("Gym with name Test gym already exists");
     }
 
-    private AddGymRequestDto createAddGymRequest(String name){
+    private AddGymRequestDto createAddGymRequest(String name) {
         return AddGymRequestDto.builder()
                 .name(name)
                 .address("Test address")
@@ -77,19 +83,60 @@ public class GymManagmentFacadeTest {
     }
 
     @Test
-    void should_list_all_gyms(){
+    void should_list_all_gyms() {
         // given
         gymManagmentFacade.addGym(createAddGymRequest("Test gym 1"));
         gymManagmentFacade.addGym(createAddGymRequest("Test gym 2"));
         gymManagmentFacade.addGym(createAddGymRequest("Test gym 3"));
 
         // when
-        List<GymInfoResponseto> gyms = gymManagmentFacade.getAllGyms();
+        List<GymInfoResponseDto> gyms = gymManagmentFacade.getAllGyms();
 
         // then
         assertThat(gyms).hasSize(3);
         assertThat(gyms.getFirst().name()).isEqualTo("Test gym 1");
         assertThat(gyms.get(1).name()).isEqualTo("Test gym 2");
         assertThat(gyms.getLast().name()).isEqualTo("Test gym 3");
+    }
+
+    @Test
+    void should_add_new_membership_to_existing_gym() {
+        // given
+        gymManagmentFacade.addGym(createAddGymRequest("Test gym"));
+
+        var membershipPlanRequest = AddMembershipPlanRequestDto.builder()
+                .name("Test plan")
+                .type(MembershipType.BASIC)
+                .amount(BigDecimal.valueOf(100))
+                .currency("USD")
+                .duration(1)
+                .maxMembers(1)
+                .gymName("Test gym")
+                .build();
+
+        // when
+        Long addedMembershipId = gymManagmentFacade.addMembershipToGym(membershipPlanRequest);
+
+        // then
+        assertThat(addedMembershipId).isEqualTo(1);
+    }
+
+    @Test
+    void should_throw_exception_when_membership_plan_want_to_be_added_while_gym_doesnt_exist(){
+        // given
+        var membershipPlanRequest = AddMembershipPlanRequestDto.builder()
+                .name("Test plan")
+                .type(MembershipType.BASIC)
+                .amount(BigDecimal.valueOf(100))
+                .currency("USD")
+                .duration(1)
+                .maxMembers(1)
+                .gymName("Test gym")
+                .build();
+
+        // when & then
+        assertThatThrownBy(() -> gymManagmentFacade.addMembershipToGym(membershipPlanRequest))
+                .isInstanceOf(GymNotFoundException.class)
+                .hasMessage("Gym with name Test gym not found");
     }
 }

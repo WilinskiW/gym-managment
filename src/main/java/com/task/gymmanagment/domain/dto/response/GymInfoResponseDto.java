@@ -3,7 +3,7 @@ package com.task.gymmanagment.domain.dto.response;
 import lombok.Builder;
 
 @Builder
-public record GymInfoResponseto(
+public record GymInfoResponseDto(
         Long id,
         String name,
         String address,

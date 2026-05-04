@@ -1,7 +1,8 @@
 package com.task.gymmanagment.domain;
 
 import com.task.gymmanagment.domain.dto.request.AddGymRequestDto;
-import com.task.gymmanagment.domain.dto.response.GymInfoResponseto;
+import com.task.gymmanagment.domain.dto.request.AddMembershipPlanRequestDto;
+import com.task.gymmanagment.domain.dto.response.GymInfoResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import java.util.List;
 @Log4j2
 class GymManagmentService {
     private final GymRepository gymRepository;
+    private final MembershipPlanRepository membershipPlanRepository;
 
     public Long createGym(AddGymRequestDto gymRequestDto) {
         var gymName = gymRequestDto.name().trim();
@@ -42,18 +44,43 @@ class GymManagmentService {
                 .build();
     }
 
-    public List<GymInfoResponseto> findAllGyms() {
+    public List<GymInfoResponseDto> findAllGyms() {
         return gymRepository.findAll().stream()
                 .map(GymManagmentService::mapGymToGymInfoDto)
                 .toList();
     }
 
-    private static GymInfoResponseto mapGymToGymInfoDto(Gym gym){
-        return GymInfoResponseto.builder()
+    private static GymInfoResponseDto mapGymToGymInfoDto(Gym gym){
+        return GymInfoResponseDto.builder()
                 .id(gym.getId())
                 .name(gym.getName())
                 .address(gym.getAddress())
                 .phoneNumber(gym.getPhoneNumber())
+                .build();
+    }
+
+    public Long createMembershipPlanForGym(AddMembershipPlanRequestDto membershipPlanRequest) {
+        var gymName = membershipPlanRequest.gymName().trim();
+        var gym = gymRepository.findByName(gymName).orElseThrow(() -> new GymNotFoundException(gymName));
+
+        MembershipPlan membershipPlan = mapDtoToMembershipPlanEntity(gym, membershipPlanRequest);
+
+        membershipPlanRepository.save(membershipPlan);
+
+        log.info("Membership plan {} added successfully", membershipPlan.getName());
+
+        return membershipPlan.getId();
+    }
+
+    private static MembershipPlan mapDtoToMembershipPlanEntity(Gym gym, AddMembershipPlanRequestDto request) {
+        return MembershipPlan.builder()
+                .name(request.name())
+                .gym(gym)
+                .type(request.type())
+                .amount(request.amount())
+                .currency(request.currency())
+                .durationMonths(request.duration())
+                .maxMembers(request.maxMembers())
                 .build();
     }
 }
