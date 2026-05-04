@@ -79,7 +79,7 @@ public class SimpleInMemoryGymRepository implements GymRepository {
 
     @Override
     public List<Gym> findAll() {
-        return List.of();
+        return db.values().stream().toList();
     }
 
     @Override

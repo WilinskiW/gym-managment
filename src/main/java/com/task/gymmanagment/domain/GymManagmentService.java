@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Log4j2
@@ -35,6 +37,21 @@ class GymManagmentService {
                 .name(gymRequestDto.name().trim())
                 .address(gymRequestDto.address().trim())
                 .phoneNumber(gymRequestDto.phoneNumber().trim())
+                .build();
+    }
+
+    public List<GymInfoDto> findAllGyms() {
+        return gymRepository.findAll().stream()
+                .map(GymManagmentService::mapGymToGymInfoDto)
+                .toList();
+    }
+
+    private static GymInfoDto mapGymToGymInfoDto(Gym gym){
+        return GymInfoDto.builder()
+                .id(gym.getId())
+                .name(gym.getName())
+                .address(gym.getAddress())
+                .phoneNumber(gym.getPhoneNumber())
                 .build();
     }
 }
