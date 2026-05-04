@@ -27,7 +27,7 @@ import java.math.BigDecimal;
 @Setter(AccessLevel.PACKAGE)
 @Getter(AccessLevel.PACKAGE)
 @Builder
-public class MembershipPlan {
+class MembershipPlan {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

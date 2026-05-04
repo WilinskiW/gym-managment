@@ -20,7 +20,7 @@ import lombok.Setter;
 @Setter(AccessLevel.PACKAGE)
 @Getter(AccessLevel.PACKAGE)
 @Builder
-public class Gym {
+class Gym {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

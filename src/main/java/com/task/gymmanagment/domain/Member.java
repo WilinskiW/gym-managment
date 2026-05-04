@@ -28,7 +28,7 @@ import java.time.Instant;
 @Setter(AccessLevel.PACKAGE)
 @Getter(AccessLevel.PACKAGE)
 @Builder
-public class Member {
+class Member {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
