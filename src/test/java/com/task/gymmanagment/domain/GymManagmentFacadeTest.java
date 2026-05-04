@@ -1,12 +1,22 @@
 package com.task.gymmanagment.domain;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class GymManagmentFacadeTest {
-    private final GymManagmentFacade gymManagmentFacade = new GymManagmentFacade(new SimpleInMemoryGymRepository());
+    private GymManagmentFacade gymManagmentFacade = createFacade();
+
+    @BeforeEach
+    void setUp() {
+        gymManagmentFacade = createFacade();
+    }
+
+    private static GymManagmentFacade createFacade() {
+        return new GymManagmentFacade(new GymManagmentService(new SimpleInMemoryGymRepository()));
+    }
 
     @Test
     void should_add_gym_if_doesnt_exist() {
