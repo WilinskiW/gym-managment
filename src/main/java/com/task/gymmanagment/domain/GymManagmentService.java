@@ -4,6 +4,7 @@ import com.task.gymmanagment.domain.dto.request.AddGymRequestDto;
 import com.task.gymmanagment.domain.dto.request.AddMemberRequestDto;
 import com.task.gymmanagment.domain.dto.request.AddMembershipPlanRequestDto;
 import com.task.gymmanagment.domain.dto.response.GymInfoResponseDto;
+import com.task.gymmanagment.domain.dto.response.MemberDto;
 import com.task.gymmanagment.domain.dto.response.MembershipPlanInfoResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -88,5 +89,11 @@ class GymManagmentService {
                 member.getId(), membershipPlanId);
 
         return member.getId();
+    }
+
+    public List<MemberDto> findAllMembers() {
+        return memberRepository.findAll().stream()
+                .map(Mapper::mapMemberToDto)
+                .toList();
     }
 }

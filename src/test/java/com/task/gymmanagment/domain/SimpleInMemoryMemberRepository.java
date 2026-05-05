@@ -135,7 +135,7 @@ class SimpleInMemoryMemberRepository implements MemberRepository {
 
     @Override
     public List<Member> findAll() {
-        return List.of();
+        return db.values().stream().toList();
     }
 
     @Override

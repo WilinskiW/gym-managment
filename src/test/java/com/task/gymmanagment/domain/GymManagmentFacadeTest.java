@@ -4,6 +4,7 @@ import com.task.gymmanagment.domain.dto.request.AddGymRequestDto;
 import com.task.gymmanagment.domain.dto.request.AddMemberRequestDto;
 import com.task.gymmanagment.domain.dto.request.AddMembershipPlanRequestDto;
 import com.task.gymmanagment.domain.dto.response.GymInfoResponseDto;
+import com.task.gymmanagment.domain.dto.response.MemberDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -279,5 +280,61 @@ public class GymManagmentFacadeTest {
                 .hasMessage("Membership plan with ID: 1 not found");
     }
 
+    @Test
+    void should_list_all_members(){
+        // given
+        facade.addGym(createAddGymRequest("Test gym"));
 
+        var membershipPlan = AddMembershipPlanRequestDto.builder()
+                .name("Test plan")
+                .type(MembershipType.BASIC)
+                .amount(BigDecimal.valueOf(100))
+                .currency("USD")
+                .duration(1)
+                .maxMembers(2)
+                .gymName("Test gym")
+                .build();
+
+        facade.addMembershipToGym(membershipPlan);
+
+        var member1 = AddMemberRequestDto.builder()
+                .membershipId(1L)
+                .fullName("Jan Kowalski")
+                .email("test@gmail.com")
+                .build();
+
+        var member2 = AddMemberRequestDto.builder()
+                .membershipId(1L)
+                .fullName("Bill Nowak")
+                .email("test@example.com")
+                .build();
+
+        facade.registerMember(member1);
+        facade.registerMember(member2);
+
+        // when
+        List<MemberDto> dtos = facade.getAllMembers();
+
+        // then
+        assertThat(dtos).hasSize(2);
+        assertThat(dtos.getFirst())
+                .matches(dto -> dto.name().equals("Jan Kowalski"))
+                .matches(dto -> dto.membershipPlan().equals("Test plan"))
+                .matches(dto -> dto.status().equals(MemberStatus.ACTIVE));
+
+        assertThat(dtos.getLast())
+                .matches(dto -> dto.name().equals("Bill Nowak"))
+                .matches(dto -> dto.membershipPlan().equals("Test plan"))
+                .matches(dto -> dto.status().equals(MemberStatus.ACTIVE));
+
+    }
+
+    @Test
+    void should_return_empty_list_when_there_are_no_members(){
+        // when
+        List<MemberDto> dtos = facade.getAllMembers();
+
+        // then
+        assertThat(dtos).isEmpty();
+    }
 }

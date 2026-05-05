@@ -4,6 +4,7 @@ import com.task.gymmanagment.domain.dto.request.AddGymRequestDto;
 import com.task.gymmanagment.domain.dto.request.AddMemberRequestDto;
 import com.task.gymmanagment.domain.dto.request.AddMembershipPlanRequestDto;
 import com.task.gymmanagment.domain.dto.response.GymInfoResponseDto;
+import com.task.gymmanagment.domain.dto.response.MemberDto;
 import com.task.gymmanagment.domain.dto.response.MembershipPlanInfoResponseDto;
 
 class Mapper {
@@ -36,15 +37,6 @@ class Mapper {
                 .build();
     }
 
-    static Member mapDtoToMemberEntity(AddMemberRequestDto dto, MembershipPlan membershipPlan){
-        return Member.builder()
-                .membershipPlan(membershipPlan)
-                .fullName(dto.fullName())
-                .email(dto.email())
-                .build();
-
-    }
-
     static MembershipPlanInfoResponseDto mapMembershipPlanToDto(MembershipPlan membershipPlan) {
         return MembershipPlanInfoResponseDto.builder()
                 .id(membershipPlan.getId())
@@ -54,6 +46,23 @@ class Mapper {
                 .currency(membershipPlan.getCurrency())
                 .durationMonths(membershipPlan.getDurationMonths())
                 .maxMembers(membershipPlan.getMaxMembers())
+                .build();
+    }
+
+    static Member mapDtoToMemberEntity(AddMemberRequestDto dto, MembershipPlan membershipPlan){
+        return Member.builder()
+                .membershipPlan(membershipPlan)
+                .fullName(dto.fullName())
+                .email(dto.email())
+                .build();
+
+    }
+
+    static MemberDto mapMemberToDto(Member member){
+        return MemberDto.builder()
+                .name(member.getFullName())
+                .membershipPlan(member.getMembershipPlan().getName())
+                .status(member.getStatus())
                 .build();
     }
 }
