@@ -1,8 +1,6 @@
-package com.task.gymmanagement.infrastructure;
+package com.task.gymmanagement.infrastructure.error;
 
 import com.task.gymmanagement.domain.exception.GymNotFoundException;
-import com.task.gymmanagement.infrastructure.dto.GymNotFoundExceptionResponseDto;
-import com.task.gymmanagement.infrastructure.dto.ValidationErrorResponseDto;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,32 +19,32 @@ public class GlobalExceptionHandler {
     private static final String ILLEGAL_ARGUMENT_LOG_MESSAGE = "Illegal argument: {}";
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ValidationErrorResponseDto> handleValidationException(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ErrorResponseDto> handleValidationException(MethodArgumentNotValidException ex) {
         var fieldError = ex.getBindingResult().getFieldError();
         var message = fieldError != null ? fieldError.getDefaultMessage() : DEFAULT_VALIDATION_MESSAGE;
 
         log.warn(VALIDATION_ERROR_LOG_MESSAGE, message);
         return ResponseEntity.badRequest()
-                .body(new ValidationErrorResponseDto(HttpStatus.BAD_REQUEST.value(), message));
+                .body(new ErrorResponseDto(HttpStatus.BAD_REQUEST.value(), message));
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ValidationErrorResponseDto> handleJsonParseException(HttpMessageNotReadableException ex) {
+    public ResponseEntity<ErrorResponseDto> handleJsonParseException(HttpMessageNotReadableException ex) {
         log.warn(JSON_PARSE_LOG_MESSAGE, ex.getMessage());
         return ResponseEntity.badRequest()
-                .body(new ValidationErrorResponseDto(HttpStatus.BAD_REQUEST.value(), JSON_PARSE_ERROR_MESSAGE));
+                .body(new ErrorResponseDto(HttpStatus.BAD_REQUEST.value(), JSON_PARSE_ERROR_MESSAGE));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ValidationErrorResponseDto> handleIllegalArgument(IllegalArgumentException ex) {
+    public ResponseEntity<ErrorResponseDto> handleIllegalArgument(IllegalArgumentException ex) {
         log.warn(ILLEGAL_ARGUMENT_LOG_MESSAGE, ex.getMessage());
         return ResponseEntity.badRequest()
-                .body(new ValidationErrorResponseDto(HttpStatus.BAD_REQUEST.value(), ex.getMessage()));
+                .body(new ErrorResponseDto(HttpStatus.BAD_REQUEST.value(), ex.getMessage()));
     }
 
     @ExceptionHandler(GymNotFoundException.class)
-    public ResponseEntity<GymNotFoundExceptionResponseDto> handleGymNotFoundException(GymNotFoundException ex) {
+    public ResponseEntity<ErrorResponseDto> handleGymNotFoundException(GymNotFoundException ex) {
         log.warn(ex.getMessage());
-        return new ResponseEntity<>(new GymNotFoundExceptionResponseDto(HttpStatus.NOT_FOUND.value(), ex.getMessage()), HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(new ErrorResponseDto(HttpStatus.NOT_FOUND.value(), ex.getMessage()), HttpStatus.NOT_FOUND);
     }
 }
