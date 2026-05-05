@@ -96,4 +96,12 @@ class GymManagmentService {
                 .map(Mapper::mapMemberToDto)
                 .toList();
     }
+
+    public void changeMemberStatusToCancel(Long memberId) {
+        var member = memberRepository.findById(memberId).orElseThrow(() -> new MemberNotFoundException(memberId));
+        member.setStatus(MemberStatus.CANCELLED);
+        memberRepository.save(member);
+
+        log.info("Member with ID: {} successfully cancelled", memberId);
+    }
 }

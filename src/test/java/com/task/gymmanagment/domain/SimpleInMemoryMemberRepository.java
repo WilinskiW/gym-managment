@@ -125,7 +125,7 @@ class SimpleInMemoryMemberRepository implements MemberRepository {
 
     @Override
     public Optional<Member> findById(final Long aLong) {
-        return Optional.empty();
+        return Optional.ofNullable(db.get(aLong));
     }
 
     @Override

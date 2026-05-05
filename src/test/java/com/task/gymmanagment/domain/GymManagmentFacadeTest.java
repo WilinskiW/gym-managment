@@ -337,4 +337,45 @@ public class GymManagmentFacadeTest {
         // then
         assertThat(dtos).isEmpty();
     }
+
+    @Test
+    void should_canceled_membership_plan_for_specify_member(){
+        // given
+        facade.addGym(createAddGymRequest("Test gym"));
+
+        var membershipPlan = AddMembershipPlanRequestDto.builder()
+                .name("Test plan")
+                .type(MembershipType.BASIC)
+                .amount(BigDecimal.valueOf(100))
+                .currency("USD")
+                .duration(1)
+                .maxMembers(2)
+                .gymName("Test gym")
+                .build();
+
+        facade.addMembershipToGym(membershipPlan);
+
+        var member = AddMemberRequestDto.builder()
+                .membershipId(1L)
+                .fullName("Jan Kowalski")
+                .email("test@gmail.com")
+                .build();
+
+        facade.registerMember(member);
+
+        // when
+        facade.cancelMembership(1L);
+
+        // then
+        List<MemberDto> dtos = facade.getAllMembers();
+        assertThat(dtos.getFirst().status()).isEqualTo(MemberStatus.CANCELLED);
+    }
+
+    @Test
+    void should_throw_exception_when_trying_to_cancel_non_existing_member(){
+        // when & then
+        assertThatThrownBy(() -> facade.cancelMembership(1L))
+                .isInstanceOf(MemberNotFoundException.class)
+                .hasMessage("Member with ID: 1 not found");
+    }
 }

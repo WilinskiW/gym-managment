@@ -40,4 +40,8 @@ public class GymManagmentFacade {
     public List<MemberDto> getAllMembers() {
         return managmentService.findAllMembers();
     }
+
+    public void cancelMembership(Long memberId){
+        managmentService.changeMemberStatusToCancel(memberId);
+    }
 }
