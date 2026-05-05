@@ -1,4 +1,4 @@
-package com.task.gymmanagment.domain;
+package com.task.gymmanagment.domain.exception;
 
 public class GymAlreadyExistException extends RuntimeException {
     private static final String DEFAULT_MESSAGE = "Gym with name %s already exists";

@@ -1,4 +1,4 @@
-package com.task.gymmanagment.domain;
+package com.task.gymmanagment.domain.exception;
 
 public class MembershipPlanNotFoundException extends RuntimeException {
     private final static String DEFAULT_MESSAGE = "Membership plan with ID: %d not found";

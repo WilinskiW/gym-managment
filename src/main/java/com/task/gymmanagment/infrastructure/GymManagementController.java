@@ -2,7 +2,7 @@ package com.task.gymmanagment.infrastructure;
 
 import com.task.gymmanagment.domain.GymManagementFacade;
 import com.task.gymmanagment.domain.dto.request.AddGymRequestDto;
-import com.task.gymmanagment.domain.dto.response.GymInfoResponseDto;
+import com.task.gymmanagment.domain.dto.response.GymDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,7 +25,7 @@ public class GymManagementController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<GymInfoResponseDto>> getAllGyms() {
+    public ResponseEntity<List<GymDto>> getAllGyms() {
         return ResponseEntity.ok(managmentFacade.getAllGyms());
     }
 }

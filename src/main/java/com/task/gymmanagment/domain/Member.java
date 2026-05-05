@@ -53,4 +53,8 @@ class Member {
     @Enumerated(value = EnumType.STRING)
     @Builder.Default
     private MemberStatus status = MemberStatus.ACTIVE;
+
+    void cancel(){
+        this.status = MemberStatus.CANCELLED;
+    }
 }

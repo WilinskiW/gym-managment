@@ -3,12 +3,12 @@ package com.task.gymmanagment.domain;
 import com.task.gymmanagment.domain.dto.request.AddGymRequestDto;
 import com.task.gymmanagment.domain.dto.request.AddMemberRequestDto;
 import com.task.gymmanagment.domain.dto.request.AddMembershipPlanRequestDto;
-import com.task.gymmanagment.domain.dto.response.GymInfoResponseDto;
+import com.task.gymmanagment.domain.dto.response.GymDto;
 import com.task.gymmanagment.domain.dto.response.MemberDto;
-import com.task.gymmanagment.domain.dto.response.MembershipPlanInfoResponseDto;
+import com.task.gymmanagment.domain.dto.response.MembershipDto;
 
-class Mapper {
-    static Gym mapDtoToGymEntity(AddGymRequestDto gymRequestDto) {
+class DomainMapper {
+    static Gym mapDtoToGym(AddGymRequestDto gymRequestDto) {
         return Gym.builder()
                 .name(gymRequestDto.name().trim())
                 .address(gymRequestDto.address().trim())
@@ -16,8 +16,8 @@ class Mapper {
                 .build();
     }
 
-    static GymInfoResponseDto mapGymToGymInfoDto(Gym gym) {
-        return GymInfoResponseDto.builder()
+    static GymDto mapGymToDto(Gym gym) {
+        return GymDto.builder()
                 .id(gym.getId())
                 .name(gym.getName())
                 .address(gym.getAddress())
@@ -25,7 +25,7 @@ class Mapper {
                 .build();
     }
 
-    static MembershipPlan mapDtoToMembershipPlanEntity(Gym gym, AddMembershipPlanRequestDto request) {
+    static MembershipPlan mapToMembershipPlan(Gym gym, AddMembershipPlanRequestDto request) {
         return MembershipPlan.builder()
                 .name(request.name())
                 .gym(gym)
@@ -37,8 +37,8 @@ class Mapper {
                 .build();
     }
 
-    static MembershipPlanInfoResponseDto mapMembershipPlanToDto(MembershipPlan membershipPlan) {
-        return MembershipPlanInfoResponseDto.builder()
+    static MembershipDto mapMembershipPlanToDto(MembershipPlan membershipPlan) {
+        return MembershipDto.builder()
                 .id(membershipPlan.getId())
                 .name(membershipPlan.getName())
                 .type(membershipPlan.getType())
@@ -49,7 +49,7 @@ class Mapper {
                 .build();
     }
 
-    static Member mapDtoToMemberEntity(AddMemberRequestDto dto, MembershipPlan membershipPlan){
+    static Member mapDtoToMember(AddMemberRequestDto dto, MembershipPlan membershipPlan){
         return Member.builder()
                 .membershipPlan(membershipPlan)
                 .fullName(dto.fullName())

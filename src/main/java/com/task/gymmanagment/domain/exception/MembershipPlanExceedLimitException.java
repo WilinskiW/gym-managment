@@ -1,4 +1,4 @@
-package com.task.gymmanagment.domain;
+package com.task.gymmanagment.domain.exception;
 
 public class MembershipPlanExceedLimitException extends RuntimeException {
     private final static String DEFAULT_MESSAGE = "Exceeded maximum members: %d for a given Membership plan with ID: %d";

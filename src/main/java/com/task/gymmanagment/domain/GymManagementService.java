@@ -3,19 +3,24 @@ package com.task.gymmanagment.domain;
 import com.task.gymmanagment.domain.dto.request.AddGymRequestDto;
 import com.task.gymmanagment.domain.dto.request.AddMemberRequestDto;
 import com.task.gymmanagment.domain.dto.request.AddMembershipPlanRequestDto;
-import com.task.gymmanagment.domain.dto.response.GymInfoResponseDto;
+import com.task.gymmanagment.domain.dto.response.GymDto;
 import com.task.gymmanagment.domain.dto.response.MemberDto;
-import com.task.gymmanagment.domain.dto.response.MembershipPlanInfoResponseDto;
+import com.task.gymmanagment.domain.dto.response.MembershipDto;
 import com.task.gymmanagment.domain.dto.response.RevenueReportDto;
+import com.task.gymmanagment.domain.exception.GymAlreadyExistException;
+import com.task.gymmanagment.domain.exception.GymNotFoundException;
+import com.task.gymmanagment.domain.exception.MemberNotFoundException;
+import com.task.gymmanagment.domain.exception.MembershipPlanExceedLimitException;
+import com.task.gymmanagment.domain.exception.MembershipPlanNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static com.task.gymmanagment.domain.Mapper.mapDtoToGymEntity;
-import static com.task.gymmanagment.domain.Mapper.mapDtoToMemberEntity;
-import static com.task.gymmanagment.domain.Mapper.mapDtoToMembershipPlanEntity;
+import static com.task.gymmanagment.domain.DomainMapper.mapDtoToGym;
+import static com.task.gymmanagment.domain.DomainMapper.mapDtoToMember;
+import static com.task.gymmanagment.domain.DomainMapper.mapToMembershipPlan;
 
 @Service
 @RequiredArgsConstructor
@@ -37,16 +42,16 @@ class GymManagementService {
             throw new IllegalArgumentException("All fields are required");
         }
 
-        Gym gym = mapDtoToGymEntity(gymRequestDto);
+        Gym gym = mapDtoToGym(gymRequestDto);
 
         Gym addedGym = gymRepository.save(gym);
         log.info("Gym with name {} added successfully", gymName);
         return addedGym.getId();
     }
 
-    public List<GymInfoResponseDto> findAllGyms() {
+    public List<GymDto> findAllGyms() {
         return gymRepository.findAll().stream()
-                .map(Mapper::mapGymToGymInfoDto)
+                .map(DomainMapper::mapGymToDto)
                 .toList();
     }
 
@@ -54,7 +59,7 @@ class GymManagementService {
         var gymName = membershipPlanRequest.gymName().trim();
         var gym = gymRepository.findByName(gymName).orElseThrow(() -> new GymNotFoundException(gymName));
 
-        MembershipPlan membershipPlan = mapDtoToMembershipPlanEntity(gym, membershipPlanRequest);
+        MembershipPlan membershipPlan = mapToMembershipPlan(gym, membershipPlanRequest);
 
         membershipPlan = membershipPlanRepository.save(membershipPlan);
 
@@ -63,11 +68,11 @@ class GymManagementService {
         return membershipPlan.getId();
     }
 
-    public List<MembershipPlanInfoResponseDto> findGymAllMembershipPlans(String gymName) {
+    public List<MembershipDto> findGymAllMembershipPlans(String gymName) {
         var gym = gymRepository.findByName(gymName).orElseThrow(() -> new GymNotFoundException(gymName));
 
         return membershipPlanRepository.findAllByGym(gym).stream()
-                .map(Mapper::mapMembershipPlanToDto)
+                .map(DomainMapper::mapMembershipPlanToDto)
                 .toList();
     }
 
@@ -83,7 +88,7 @@ class GymManagementService {
             throw new MembershipPlanExceedLimitException(maxMembers, membershipPlanId);
         }
 
-        var member = mapDtoToMemberEntity(dto, membershipPlan);
+        var member = mapDtoToMember(dto, membershipPlan);
         member = memberRepository.save(member);
 
         log.info("Member with ID: {} successfully added to Membership plan with ID: {}",
@@ -94,13 +99,13 @@ class GymManagementService {
 
     public List<MemberDto> findAllMembers() {
         return memberRepository.findAll().stream()
-                .map(Mapper::mapMemberToDto)
+                .map(DomainMapper::mapMemberToDto)
                 .toList();
     }
 
     public void changeMemberStatusToCancel(Long memberId) {
         var member = memberRepository.findById(memberId).orElseThrow(() -> new MemberNotFoundException(memberId));
-        member.setStatus(MemberStatus.CANCELLED);
+        member.cancel();
         memberRepository.save(member);
 
         log.info("Member with ID: {} successfully cancelled", memberId);

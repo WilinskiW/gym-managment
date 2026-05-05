@@ -3,8 +3,13 @@ package com.task.gymmanagment.domain;
 import com.task.gymmanagment.domain.dto.request.AddGymRequestDto;
 import com.task.gymmanagment.domain.dto.request.AddMemberRequestDto;
 import com.task.gymmanagment.domain.dto.request.AddMembershipPlanRequestDto;
-import com.task.gymmanagment.domain.dto.response.GymInfoResponseDto;
+import com.task.gymmanagment.domain.dto.response.GymDto;
 import com.task.gymmanagment.domain.dto.response.MemberDto;
+import com.task.gymmanagment.domain.exception.GymAlreadyExistException;
+import com.task.gymmanagment.domain.exception.GymNotFoundException;
+import com.task.gymmanagment.domain.exception.MemberNotFoundException;
+import com.task.gymmanagment.domain.exception.MembershipPlanExceedLimitException;
+import com.task.gymmanagment.domain.exception.MembershipPlanNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -93,7 +98,7 @@ public class GymManagementFacadeTest {
         facade.addGym(createAddGymRequest("Test gym 3"));
 
         // when
-        List<GymInfoResponseDto> gyms = facade.getAllGyms();
+        List<GymDto> gyms = facade.getAllGyms();
 
         // then
         assertThat(gyms).hasSize(3);

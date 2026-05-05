@@ -3,9 +3,9 @@ package com.task.gymmanagment.domain;
 import com.task.gymmanagment.domain.dto.request.AddGymRequestDto;
 import com.task.gymmanagment.domain.dto.request.AddMemberRequestDto;
 import com.task.gymmanagment.domain.dto.request.AddMembershipPlanRequestDto;
-import com.task.gymmanagment.domain.dto.response.GymInfoResponseDto;
+import com.task.gymmanagment.domain.dto.response.GymDto;
 import com.task.gymmanagment.domain.dto.response.MemberDto;
-import com.task.gymmanagment.domain.dto.response.MembershipPlanInfoResponseDto;
+import com.task.gymmanagment.domain.dto.response.MembershipDto;
 import com.task.gymmanagment.domain.dto.response.RevenueReportDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -22,7 +22,7 @@ public class GymManagementFacade {
         return managmentService.createGym(gymRequestDto);
     }
 
-    public List<GymInfoResponseDto> getAllGyms() {
+    public List<GymDto> getAllGyms() {
         return managmentService.findAllGyms();
     }
 
@@ -30,7 +30,7 @@ public class GymManagementFacade {
         return managmentService.createMembershipPlanForGym(membershipPlanRequest);
     }
 
-    public List<MembershipPlanInfoResponseDto> getGymAllMembershipPlans(String gymName) {
+    public List<MembershipDto> getGymAllMembershipPlans(String gymName) {
         return managmentService.findGymAllMembershipPlans(gymName);
     }
 
