@@ -14,16 +14,16 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-public class GymManagmentFacadeTest {
-    private GymManagmentFacade facade = createFacade();
+public class GymManagementFacadeTest {
+    private GymManagementFacade facade = createFacade();
 
     @BeforeEach
     void setUp() {
         facade = createFacade();
     }
 
-    private static GymManagmentFacade createFacade() {
-        return new GymManagmentFacade(new GymManagmentService
+    private static GymManagementFacade createFacade() {
+        return new GymManagementFacade(new GymManagementService
                 (
                         new SimpleInMemoryGymRepository(),
                         new SimpleInMemoryMembershipPlanRepository(),

@@ -1,6 +1,6 @@
 package com.task.gymmanagment.infrastructure;
 
-import com.task.gymmanagment.domain.GymManagmentFacade;
+import com.task.gymmanagment.domain.GymManagementFacade;
 import com.task.gymmanagment.domain.dto.request.AddGymRequestDto;
 import com.task.gymmanagment.domain.dto.response.GymInfoResponseDto;
 import lombok.RequiredArgsConstructor;
@@ -16,8 +16,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/gym")
 @RequiredArgsConstructor
-public class GymManagmentController {
-    private final GymManagmentFacade managmentFacade;
+public class GymManagementController {
+    private final GymManagementFacade managmentFacade;
 
     @PostMapping
     public ResponseEntity<Long> addGym(@RequestBody AddGymRequestDto gymRequestDto) {

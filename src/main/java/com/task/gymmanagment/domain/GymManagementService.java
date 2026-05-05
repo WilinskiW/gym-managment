@@ -20,7 +20,7 @@ import static com.task.gymmanagment.domain.Mapper.mapDtoToMembershipPlanEntity;
 @Service
 @RequiredArgsConstructor
 @Log4j2
-class GymManagmentService {
+class GymManagementService {
     private final GymRepository gymRepository;
     private final MembershipPlanRepository membershipPlanRepository;
     private final MemberRepository memberRepository;

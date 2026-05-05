@@ -14,9 +14,9 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class GymManagmentFacade {
+public class GymManagementFacade {
 
-    private final GymManagmentService managmentService;
+    private final GymManagementService managmentService;
 
     public Long addGym(AddGymRequestDto gymRequestDto) {
         return managmentService.createGym(gymRequestDto);
