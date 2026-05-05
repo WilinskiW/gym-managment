@@ -81,7 +81,7 @@ class GymManagementService {
         var membershipPlan = membershipPlanRepository.findById(membershipPlanId)
                         .orElseThrow(() -> new MembershipPlanNotFoundException(membershipPlanId));
 
-        var membersCount = memberRepository.countMembersByMembershipPlan(membershipPlan);
+        var membersCount = memberRepository.countActiveMembersByMembershipPlan(membershipPlan);
         var maxMembers = membershipPlan.getMaxMembers();
 
         if(membersCount >= maxMembers){

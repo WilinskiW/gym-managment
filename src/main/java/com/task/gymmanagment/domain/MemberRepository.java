@@ -9,7 +9,9 @@ import java.util.List;
 
 @Repository
 interface MemberRepository extends JpaRepository<Member, Long> {
-    long countMembersByMembershipPlan(MembershipPlan membershipPlan);
+
+    @Query("SELECT COUNT(m) FROM Member m WHERE m.membershipPlan = ?1 AND m.status = 'ACTIVE'")
+    long countActiveMembersByMembershipPlan(MembershipPlan membershipPlan);
 
     @Query("""
                 SELECT p.gym.name AS gymName,
