@@ -114,7 +114,7 @@ class SimpleInMemoryMembershipPlanRepository implements MembershipPlanRepository
 
     @Override
     public Optional<MembershipPlan> findById(Long aLong) {
-        return Optional.of(db.get(aLong));
+        return Optional.ofNullable(db.get(aLong));
     }
 
     @Override
