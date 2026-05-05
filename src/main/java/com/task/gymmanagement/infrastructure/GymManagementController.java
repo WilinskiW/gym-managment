@@ -2,11 +2,14 @@ package com.task.gymmanagement.infrastructure;
 
 import com.task.gymmanagement.domain.GymManagementFacade;
 import com.task.gymmanagement.domain.dto.request.AddGymRequestDto;
+import com.task.gymmanagement.domain.dto.request.AddMembershipPlanRequestDto;
 import com.task.gymmanagement.domain.dto.response.GymDto;
+import com.task.gymmanagement.domain.dto.response.MembershipPlanDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,5 +31,16 @@ public class GymManagementController {
     @GetMapping
     public ResponseEntity<List<GymDto>> getAllGyms() {
         return ResponseEntity.ok(managementFacade.getAllGyms());
+    }
+
+    @PostMapping("/membership")
+    public ResponseEntity<Long> createMembershipPlanForGivenGym(@Valid @RequestBody
+                                                                AddMembershipPlanRequestDto membershipPlanRequest) {
+        return ResponseEntity.ok(managementFacade.addMembershipToGym(membershipPlanRequest));
+    }
+
+    @GetMapping("/{gymName}")
+    public ResponseEntity<List<MembershipPlanDto>> getAllMembershipPlansForGym(@PathVariable String gymName) {
+        return ResponseEntity.ok(managementFacade.getGymAllMembershipPlans(gymName));
     }
 }
