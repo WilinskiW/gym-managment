@@ -5,7 +5,7 @@ import com.task.gymmanagement.domain.dto.request.AddMemberRequestDto;
 import com.task.gymmanagement.domain.dto.request.AddMembershipPlanRequestDto;
 import com.task.gymmanagement.domain.dto.response.GymDto;
 import com.task.gymmanagement.domain.dto.response.MemberDto;
-import com.task.gymmanagement.domain.dto.response.MembershipDto;
+import com.task.gymmanagement.domain.dto.response.MembershipPlanDto;
 import com.task.gymmanagement.domain.dto.response.RevenueReportDto;
 import com.task.gymmanagement.domain.exception.GymAlreadyExistException;
 import com.task.gymmanagement.domain.exception.GymNotFoundException;
@@ -68,7 +68,7 @@ class GymManagementService {
         return membershipPlan.getId();
     }
 
-    public List<MembershipDto> findGymAllMembershipPlans(String gymName) {
+    public List<MembershipPlanDto> findGymAllMembershipPlans(String gymName) {
         var gym = gymRepository.findByName(gymName).orElseThrow(() -> new GymNotFoundException(gymName));
 
         return membershipPlanRepository.findAllByGym(gym).stream()

@@ -5,7 +5,7 @@ import com.task.gymmanagement.domain.dto.request.AddMemberRequestDto;
 import com.task.gymmanagement.domain.dto.request.AddMembershipPlanRequestDto;
 import com.task.gymmanagement.domain.dto.response.GymDto;
 import com.task.gymmanagement.domain.dto.response.MemberDto;
-import com.task.gymmanagement.domain.dto.response.MembershipDto;
+import com.task.gymmanagement.domain.dto.response.MembershipPlanDto;
 import com.task.gymmanagement.domain.dto.response.RevenueReportDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -30,7 +30,7 @@ public class GymManagementFacade {
         return managementService.createMembershipPlanForGym(membershipPlanRequest);
     }
 
-    public List<MembershipDto> getGymAllMembershipPlans(String gymName) {
+    public List<MembershipPlanDto> getGymAllMembershipPlans(String gymName) {
         return managementService.findGymAllMembershipPlans(gymName);
     }
 

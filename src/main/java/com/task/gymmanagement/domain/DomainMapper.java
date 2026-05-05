@@ -5,7 +5,7 @@ import com.task.gymmanagement.domain.dto.request.AddMemberRequestDto;
 import com.task.gymmanagement.domain.dto.request.AddMembershipPlanRequestDto;
 import com.task.gymmanagement.domain.dto.response.GymDto;
 import com.task.gymmanagement.domain.dto.response.MemberDto;
-import com.task.gymmanagement.domain.dto.response.MembershipDto;
+import com.task.gymmanagement.domain.dto.response.MembershipPlanDto;
 
 class DomainMapper {
     static Gym mapDtoToGym(AddGymRequestDto gymRequestDto) {
@@ -37,8 +37,8 @@ class DomainMapper {
                 .build();
     }
 
-    static MembershipDto mapMembershipPlanToDto(MembershipPlan membershipPlan) {
-        return MembershipDto.builder()
+    static MembershipPlanDto mapMembershipPlanToDto(MembershipPlan membershipPlan) {
+        return MembershipPlanDto.builder()
                 .id(membershipPlan.getId())
                 .name(membershipPlan.getName())
                 .type(membershipPlan.getType())

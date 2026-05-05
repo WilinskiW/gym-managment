@@ -6,7 +6,7 @@ import lombok.Builder;
 import java.math.BigDecimal;
 
 @Builder
-public record MembershipDto(
+public record MembershipPlanDto(
         Long id,
         String name,
         MembershipType type,
