@@ -119,7 +119,7 @@ public class GymManagementFacadeTest {
                 .currency("USD")
                 .duration(1)
                 .maxMembers(1)
-                .gymName("Test gym")
+                .gymId(1L)
                 .build();
 
         // when
@@ -139,13 +139,13 @@ public class GymManagementFacadeTest {
                 .currency("USD")
                 .duration(1)
                 .maxMembers(1)
-                .gymName("Test gym")
+                .gymId(1L)
                 .build();
 
         // when & then
         assertThatThrownBy(() -> facade.addMembershipToGym(membershipPlanRequest))
                 .isInstanceOf(GymNotFoundException.class)
-                .hasMessage("Gym with name Test gym not found");
+                .hasMessage("Gym with ID: 1 not found");
     }
 
     @Test
@@ -160,7 +160,7 @@ public class GymManagementFacadeTest {
                 .currency("USD")
                 .duration(1)
                 .maxMembers(1)
-                .gymName("Test gym")
+                .gymId(1L)
                 .build();
 
         var membershipPlan2 = AddMembershipPlanRequestDto.builder()
@@ -170,7 +170,7 @@ public class GymManagementFacadeTest {
                 .currency("PLN")
                 .duration(1)
                 .maxMembers(1)
-                .gymName("Test gym")
+                .gymId(1L)
                 .build();
 
 
@@ -178,7 +178,7 @@ public class GymManagementFacadeTest {
         facade.addMembershipToGym(membershipPlan2);
 
         // when
-        var membershipPlans = facade.getGymAllMembershipPlans("Test gym");
+        var membershipPlans = facade.getGymAllMembershipPlans(1L);
 
         // then
         assertThat(membershipPlans).hasSize(2);
@@ -188,9 +188,9 @@ public class GymManagementFacadeTest {
 
     @Test
     void should_throw_exception_when_gym_doesnt_exist_while_trying_to_list_membership_plans() {
-        assertThatThrownBy(() -> facade.getGymAllMembershipPlans("Test gym"))
+        assertThatThrownBy(() -> facade.getGymAllMembershipPlans(1L))
                 .isInstanceOf(GymNotFoundException.class)
-                .hasMessage("Gym with name Test gym not found");
+                .hasMessage("Gym with ID: 1 not found");
     }
 
     @Test
@@ -205,7 +205,7 @@ public class GymManagementFacadeTest {
                 .currency("USD")
                 .duration(1)
                 .maxMembers(2)
-                .gymName("Test gym")
+                .gymId(1L)
                 .build();
 
         facade.addMembershipToGym(membershipPlan);
@@ -243,7 +243,7 @@ public class GymManagementFacadeTest {
                 .currency("USD")
                 .duration(1)
                 .maxMembers(1)
-                .gymName("Test gym")
+                .gymId(1L)
                 .build();
 
         facade.addMembershipToGym(membershipPlan);
@@ -297,7 +297,7 @@ public class GymManagementFacadeTest {
                 .currency("USD")
                 .duration(1)
                 .maxMembers(2)
-                .gymName("Test gym")
+                .gymId(1L)
                 .build();
 
         facade.addMembershipToGym(membershipPlan);
@@ -355,7 +355,7 @@ public class GymManagementFacadeTest {
                 .currency("USD")
                 .duration(1)
                 .maxMembers(2)
-                .gymName("Test gym")
+                .gymId(1L)
                 .build();
 
         facade.addMembershipToGym(membershipPlan);
@@ -396,7 +396,7 @@ public class GymManagementFacadeTest {
                 .currency("USD")
                 .duration(1)
                 .maxMembers(2)
-                .gymName("Test gym")
+                .gymId(1L)
                 .build();
 
         var membershipPlan2 = AddMembershipPlanRequestDto.builder()
@@ -406,7 +406,7 @@ public class GymManagementFacadeTest {
                 .currency("GBP")
                 .duration(1)
                 .maxMembers(2)
-                .gymName("Test gym")
+                .gymId(1L)
                 .build();
 
         facade.addMembershipToGym(membershipPlan1);

@@ -30,8 +30,8 @@ public class GymManagementFacade {
         return managementService.createMembershipPlanForGym(membershipPlanRequest);
     }
 
-    public List<MembershipPlanDto> getGymAllMembershipPlans(String gymName) {
-        return managementService.findGymAllMembershipPlans(gymName);
+    public List<MembershipPlanDto> getGymAllMembershipPlans(Long gymId) {
+        return managementService.findGymAllMembershipPlans(gymId);
     }
 
     public Long registerMember(AddMemberRequestDto member) {

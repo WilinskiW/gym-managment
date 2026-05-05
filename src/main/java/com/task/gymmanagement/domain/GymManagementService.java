@@ -59,8 +59,8 @@ class GymManagementService {
     }
 
     public Long createMembershipPlanForGym(AddMembershipPlanRequestDto membershipPlanRequest) {
-        var gymName = membershipPlanRequest.gymName().trim();
-        var gym = gymRepository.findByName(gymName).orElseThrow(() -> new GymNotFoundException(gymName));
+        var gymId = membershipPlanRequest.gymId();
+        var gym = gymRepository.findById(gymId).orElseThrow(() -> new GymNotFoundException(gymId));
 
         MembershipPlan membershipPlan = mapToMembershipPlan(gym, membershipPlanRequest);
 
@@ -72,8 +72,8 @@ class GymManagementService {
     }
 
     @Transactional(readOnly = true)
-    public List<MembershipPlanDto> findGymAllMembershipPlans(String gymName) {
-        var gym = gymRepository.findByName(gymName).orElseThrow(() -> new GymNotFoundException(gymName));
+    public List<MembershipPlanDto> findGymAllMembershipPlans(Long id) {
+        var gym = gymRepository.findById(id).orElseThrow(() -> new GymNotFoundException(id));
 
         return membershipPlanRepository.findAllByGym(gym).stream()
                 .map(DomainMapper::mapMembershipPlanToDto)

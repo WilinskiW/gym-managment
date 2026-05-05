@@ -35,6 +35,7 @@ public record AddMembershipPlanRequestDto(
         @Min(1)
         Integer maxMembers,
 
-        @NotBlank
-        String gymName
+        @NotNull
+        @Min(1)
+        Long gymId
 ) {}

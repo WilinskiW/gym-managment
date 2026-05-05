@@ -41,9 +41,9 @@ public class GymController {
         return ResponseEntity.status(HttpStatus.CREATED).body(managementFacade.addMembershipToGym(membershipPlanRequest));
     }
 
-    @GetMapping("/gyms/{gymName}/membership-plans")
-    public ResponseEntity<List<MembershipPlanDto>> getAllMembershipPlansForGym(@PathVariable String gymName) {
-        return ResponseEntity.ok(managementFacade.getGymAllMembershipPlans(gymName));
+    @GetMapping("/gyms/{id}/membership-plans")
+    public ResponseEntity<List<MembershipPlanDto>> getAllMembershipPlansForGym(@PathVariable Long id) {
+        return ResponseEntity.ok(managementFacade.getGymAllMembershipPlans(id));
     }
 
     @GetMapping("/reports/revenue")
