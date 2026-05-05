@@ -81,8 +81,12 @@ class GymManagementService {
     }
 
     public MemberDto addMemberToMembershipPlan(AddMemberRequestDto dto) {
-        var member = validateMembershipPlan(dto);
-        memberRepository.save(member);
+        var membershipPlanId = dto.membershipId();
+        var membershipPlan = getMembershipPlanOrThrow(membershipPlanId);
+
+        validateMembershipPlanCapacity(membershipPlan, membershipPlanId);
+
+        var member = memberRepository.save(mapDtoToMember(dto, membershipPlan));
 
         log.info("Member with ID: {} successfully added to Membership plan with ID: {}",
                 member.getId(), dto.membershipId());
@@ -90,20 +94,18 @@ class GymManagementService {
         return mapMemberToDto(member);
     }
 
-    private Member validateMembershipPlan(AddMemberRequestDto dto) {
-        var membershipPlanId = dto.membershipId();
-
-        var membershipPlan = membershipPlanRepository.findById(membershipPlanId)
+    private MembershipPlan getMembershipPlanOrThrow(Long membershipPlanId){
+        return membershipPlanRepository.findById(membershipPlanId)
                 .orElseThrow(() -> new MembershipPlanNotFoundException(membershipPlanId));
+    }
 
+    private void validateMembershipPlanCapacity(MembershipPlan membershipPlan, Long membershipPlanId) {
         var membersCount = memberRepository.countActiveMembersByMembershipPlan(membershipPlan);
         var maxMembers = membershipPlan.getMaxMembers();
 
         if (membersCount >= maxMembers) {
             throw new MembershipPlanExceedLimitException(maxMembers, membershipPlanId);
         }
-
-        return mapDtoToMember(dto, membershipPlan);
     }
 
     @Transactional(readOnly = true)
