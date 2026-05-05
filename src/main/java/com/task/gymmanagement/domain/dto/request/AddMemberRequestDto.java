@@ -8,14 +8,14 @@ import lombok.Builder;
 
 @Builder
 public record AddMemberRequestDto(
-        @NotNull
+        @NotNull(message = "Membership ID is required")
         Long membershipId,
 
-        @NotBlank
+        @NotBlank(message = "Full name cannot be empty")
         @Size(min = 2, max = 255, message = "Full name must be between 2 and 255 characters")
         String fullName,
 
-        @NotBlank
+        @NotBlank(message = "Email cannot be empty")
         @Email(message = "Invalid email format")
         String email
 ) {

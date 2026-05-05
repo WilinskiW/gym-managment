@@ -13,13 +13,16 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RestControllerAdvice
 @Log4j2
 public class GlobalExceptionHandler {
     private static final String DEFAULT_ERROR_MESSAGE = "An unexpected error occurred";
     private static final String DEFAULT_VALIDATION_MESSAGE = "Validation failed";
     private static final String JSON_PARSE_ERROR_MESSAGE = "Invalid JSON format or value";
-    private static final String VALIDATION_ERROR_LOG_MESSAGE = "Validation error: {}";
+    private static final String VALIDATION_ERROR_LOG_MESSAGE = "Validation error at fields: {}";
     private static final String JSON_PARSE_LOG_MESSAGE = "JSON parse error: {}";
     private static final String ILLEGAL_ARGUMENT_LOG_MESSAGE = "Illegal argument: {}";
 
@@ -31,13 +34,16 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponseDto> handleValidationException(MethodArgumentNotValidException ex) {
-        var fieldError = ex.getBindingResult().getFieldError();
-        var message = fieldError != null ? fieldError.getDefaultMessage() : DEFAULT_VALIDATION_MESSAGE;
+    public ResponseEntity<ValidationErrorResponseDto> handleValidationException(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
 
-        log.warn(VALIDATION_ERROR_LOG_MESSAGE, message);
+        ex.getBindingResult().getFieldErrors().forEach(error ->
+                errors.put(error.getField(), error.getDefaultMessage())
+        );
+
+        log.warn(VALIDATION_ERROR_LOG_MESSAGE, errors.keySet());
         return ResponseEntity.badRequest()
-                .body(new ErrorResponseDto(HttpStatus.BAD_REQUEST.value(), message));
+                .body(new ValidationErrorResponseDto(HttpStatus.BAD_REQUEST.value(), DEFAULT_VALIDATION_MESSAGE, errors));
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
