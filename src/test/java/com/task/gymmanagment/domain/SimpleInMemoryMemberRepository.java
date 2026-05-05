@@ -22,7 +22,7 @@ class SimpleInMemoryMemberRepository implements MemberRepository {
     @Override
     public long countMembersByMembershipPlan(final MembershipPlan membershipPlan) {
         return db.values().stream()
-                .filter(m -> m.getMembershipPlan().equals(membershipPlan))
+                .filter(m -> m.getMembershipPlan().equals(membershipPlan) && m.getStatus().equals(MemberStatus.ACTIVE))
                 .count();
     }
 
