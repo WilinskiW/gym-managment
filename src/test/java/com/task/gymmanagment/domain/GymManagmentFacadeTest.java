@@ -125,7 +125,7 @@ public class GymManagmentFacadeTest {
     }
 
     @Test
-    void should_throw_exception_when_membership_plan_want_to_be_added_while_gym_doesnt_exist(){
+    void should_throw_exception_when_membership_plan_want_to_be_added_while_gym_doesnt_exist() {
         // given
         var membershipPlanRequest = AddMembershipPlanRequestDto.builder()
                 .name("Test plan")
@@ -144,7 +144,7 @@ public class GymManagmentFacadeTest {
     }
 
     @Test
-    void should_list_all_membership_plans_for_existing_gym(){
+    void should_list_all_membership_plans_for_existing_gym() {
         // given
         facade.addGym(createAddGymRequest("Test gym"));
 
@@ -182,14 +182,14 @@ public class GymManagmentFacadeTest {
     }
 
     @Test
-    void should_throw_exception_when_gym_doesnt_exist_while_trying_to_list_membership_plans(){
-        assertThatThrownBy(() ->  facade.getGymAllMembershipPlans("Test gym"))
+    void should_throw_exception_when_gym_doesnt_exist_while_trying_to_list_membership_plans() {
+        assertThatThrownBy(() -> facade.getGymAllMembershipPlans("Test gym"))
                 .isInstanceOf(GymNotFoundException.class)
                 .hasMessage("Gym with name Test gym not found");
     }
 
     @Test
-    void should_add_new_members_to_existing_membership_plan_when_members_amount_is_in_bound(){
+    void should_add_new_members_to_existing_membership_plan_when_members_amount_is_in_bound() {
         // given
         facade.addGym(createAddGymRequest("Test gym"));
 
@@ -227,7 +227,7 @@ public class GymManagmentFacadeTest {
     }
 
     @Test
-    void should_throw_exception_when_new_member_is_out_of_bound(){
+    void should_throw_exception_when_new_member_is_out_of_bound() {
         // given
         facade.addGym(createAddGymRequest("Test gym"));
 
@@ -264,7 +264,7 @@ public class GymManagmentFacadeTest {
     }
 
     @Test
-    void should_throw_exception_membership_plan_not_found_while_adding_new_member(){
+    void should_throw_exception_membership_plan_not_found_while_adding_new_member() {
         // given
         facade.addGym(createAddGymRequest("Test gym"));
 
@@ -281,7 +281,7 @@ public class GymManagmentFacadeTest {
     }
 
     @Test
-    void should_list_all_members(){
+    void should_list_all_members() {
         // given
         facade.addGym(createAddGymRequest("Test gym"));
 
@@ -330,7 +330,7 @@ public class GymManagmentFacadeTest {
     }
 
     @Test
-    void should_return_empty_list_when_there_are_no_members(){
+    void should_return_empty_list_when_there_are_no_members() {
         // when
         List<MemberDto> dtos = facade.getAllMembers();
 
@@ -339,7 +339,7 @@ public class GymManagmentFacadeTest {
     }
 
     @Test
-    void should_canceled_membership_plan_for_specify_member(){
+    void should_canceled_membership_plan_for_specify_member() {
         // given
         facade.addGym(createAddGymRequest("Test gym"));
 
@@ -372,10 +372,77 @@ public class GymManagmentFacadeTest {
     }
 
     @Test
-    void should_throw_exception_when_trying_to_cancel_non_existing_member(){
+    void should_throw_exception_when_trying_to_cancel_non_existing_member() {
         // when & then
         assertThatThrownBy(() -> facade.cancelMembership(1L))
                 .isInstanceOf(MemberNotFoundException.class)
                 .hasMessage("Member with ID: 1 not found");
+    }
+
+    @Test
+    void should_return_correct_revenue() {
+        // given
+        facade.addGym(createAddGymRequest("Test gym"));
+
+        var membershipPlan1 = AddMembershipPlanRequestDto.builder()
+                .name("Test plan")
+                .type(MembershipType.BASIC)
+                .amount(BigDecimal.valueOf(100))
+                .currency("USD")
+                .duration(1)
+                .maxMembers(2)
+                .gymName("Test gym")
+                .build();
+
+        var membershipPlan2 = AddMembershipPlanRequestDto.builder()
+                .name("Test plan")
+                .type(MembershipType.BASIC)
+                .amount(BigDecimal.valueOf(120))
+                .currency("GBP")
+                .duration(1)
+                .maxMembers(2)
+                .gymName("Test gym")
+                .build();
+
+        facade.addMembershipToGym(membershipPlan1);
+        facade.addMembershipToGym(membershipPlan2);
+
+        var member1 = AddMemberRequestDto.builder()
+                .membershipId(1L)
+                .fullName("Jan Kowalski")
+                .email("test@gmail.com")
+                .build();
+
+        var member2 = AddMemberRequestDto.builder()
+                .membershipId(1L)
+                .fullName("Jan Kowalski")
+                .email("test@gmail.com")
+                .build();
+
+        var member3 = AddMemberRequestDto.builder()
+                .membershipId(2L)
+                .fullName("Bill Clinton")
+                .email("test@example.com")
+                .build();
+
+        facade.registerMember(member1);
+        facade.registerMember(member2);
+        facade.registerMember(member3);
+
+        // when
+        var revenueReport = facade.getRevenueReport();
+
+        // then
+        assertThat(revenueReport).hasSize(2);
+
+        assertThat(revenueReport.getFirst())
+                .matches(r -> r.gymName().equals("Test gym"))
+                .matches(r -> r.amount().equals(BigDecimal.valueOf(120)))
+                .matches(r -> r.currency().equals("GBP"));
+
+        assertThat(revenueReport.getLast())
+                .matches(r -> r.gymName().equals("Test gym"))
+                .matches(r -> r.amount().equals(BigDecimal.valueOf(200)))
+                .matches(r -> r.currency().equals("USD"));
     }
 }

@@ -1,11 +1,13 @@
 package com.task.gymmanagment.domain;
 
+import com.task.gymmanagment.domain.dto.response.RevenueReportDto;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.query.FluentQuery;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
@@ -13,6 +15,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 class SimpleInMemoryMemberRepository implements MemberRepository {
     private final Map<Long, Member> db = new HashMap<>();
@@ -24,6 +27,30 @@ class SimpleInMemoryMemberRepository implements MemberRepository {
         return db.values().stream()
                 .filter(m -> m.getMembershipPlan().equals(membershipPlan) && m.getStatus().equals(MemberStatus.ACTIVE))
                 .count();
+    }
+
+    @Override
+    public List<RevenueReportDto> calculateRevenueReport() {
+        return db.values().stream()
+                .filter(m -> m.getStatus().equals(MemberStatus.ACTIVE))
+                .collect(Collectors.groupingBy(
+                        members -> new GroupKey(
+                                members.getMembershipPlan().getGym().getName(),
+                                members.getMembershipPlan().getCurrency()
+                        ),
+                        Collectors.mapping(m -> m.getMembershipPlan().getAmount(),
+                                Collectors.reducing(BigDecimal.ZERO, BigDecimal::add))
+                ))
+                .entrySet().stream()
+                .map(entry -> RevenueReportDto.builder()
+                        .gymName(entry.getKey().gymName())
+                        .amount(entry.getValue())
+                        .currency(entry.getKey().currencyCode())
+                        .build())
+                .toList();
+    }
+
+    private record GroupKey(String gymName, String currencyCode) {
     }
 
     @Override

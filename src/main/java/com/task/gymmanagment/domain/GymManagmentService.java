@@ -6,6 +6,7 @@ import com.task.gymmanagment.domain.dto.request.AddMembershipPlanRequestDto;
 import com.task.gymmanagment.domain.dto.response.GymInfoResponseDto;
 import com.task.gymmanagment.domain.dto.response.MemberDto;
 import com.task.gymmanagment.domain.dto.response.MembershipPlanInfoResponseDto;
+import com.task.gymmanagment.domain.dto.response.RevenueReportDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
@@ -103,5 +104,9 @@ class GymManagmentService {
         memberRepository.save(member);
 
         log.info("Member with ID: {} successfully cancelled", memberId);
+    }
+
+    public List<RevenueReportDto> createRevenueReport() {
+        return memberRepository.calculateRevenueReport();
     }
 }

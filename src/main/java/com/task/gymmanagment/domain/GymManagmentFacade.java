@@ -6,6 +6,7 @@ import com.task.gymmanagment.domain.dto.request.AddMembershipPlanRequestDto;
 import com.task.gymmanagment.domain.dto.response.GymInfoResponseDto;
 import com.task.gymmanagment.domain.dto.response.MemberDto;
 import com.task.gymmanagment.domain.dto.response.MembershipPlanInfoResponseDto;
+import com.task.gymmanagment.domain.dto.response.RevenueReportDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -43,5 +44,9 @@ public class GymManagmentFacade {
 
     public void cancelMembership(Long memberId){
         managmentService.changeMemberStatusToCancel(memberId);
+    }
+
+    public List<RevenueReportDto> getRevenueReport() {
+        return managmentService.createRevenueReport();
     }
 }
