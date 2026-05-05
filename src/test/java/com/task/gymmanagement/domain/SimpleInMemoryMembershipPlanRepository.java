@@ -1,0 +1,181 @@
+package com.task.gymmanagement.domain;
+
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.repository.query.FluentQuery;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Function;
+
+class SimpleInMemoryMembershipPlanRepository implements MembershipPlanRepository {
+    private final Map<Long, MembershipPlan> db = new HashMap<>();
+    private final AtomicLong idGenerator = new AtomicLong(1);
+
+    @Override
+    public void flush() {
+
+    }
+
+    @Override
+    public <S extends MembershipPlan> S saveAndFlush(S entity) {
+        return null;
+    }
+
+    @Override
+    public <S extends MembershipPlan> List<S> saveAllAndFlush(Iterable<S> entities) {
+        return List.of();
+    }
+
+    @Override
+    public void deleteAllInBatch(Iterable<MembershipPlan> entities) {
+
+    }
+
+    @Override
+    public void deleteAllByIdInBatch(Iterable<Long> longs) {
+
+    }
+
+    @Override
+    public void deleteAllInBatch() {
+
+    }
+
+    @Override
+    public MembershipPlan getOne(Long aLong) {
+        return null;
+    }
+
+    @Override
+    public MembershipPlan getById(Long aLong) {
+        return null;
+    }
+
+    @Override
+    public MembershipPlan getReferenceById(Long aLong) {
+        return null;
+    }
+
+    @Override
+    public <S extends MembershipPlan> Optional<S> findOne(Example<S> example) {
+        return Optional.empty();
+    }
+
+    @Override
+    public <S extends MembershipPlan> List<S> findAll(Example<S> example) {
+        return List.of();
+    }
+
+    @Override
+    public <S extends MembershipPlan> List<S> findAll(Example<S> example, Sort sort) {
+        return List.of();
+    }
+
+    @Override
+    public <S extends MembershipPlan> Page<S> findAll(Example<S> example, Pageable pageable) {
+        return null;
+    }
+
+    @Override
+    public <S extends MembershipPlan> long count(Example<S> example) {
+        return 0;
+    }
+
+    @Override
+    public <S extends MembershipPlan> boolean exists(Example<S> example) {
+        return false;
+    }
+
+    @Override
+    public <S extends MembershipPlan, R> R findBy(Example<S> example, Function<FluentQuery.FetchableFluentQuery<S>, R> queryFunction) {
+        return null;
+    }
+
+    @Override
+    public <S extends MembershipPlan> S save(S entity) {
+        Long id = idGenerator.getAndIncrement();
+        if (entity.getId() == null) {
+            entity.setId(id);
+        }
+        db.put(id, entity);
+        return entity;
+    }
+
+    @Override
+    public <S extends MembershipPlan> List<S> saveAll(Iterable<S> entities) {
+        return List.of();
+    }
+
+    @Override
+    public Optional<MembershipPlan> findById(Long aLong) {
+        return Optional.ofNullable(db.get(aLong));
+    }
+
+    @Override
+    public boolean existsById(Long aLong) {
+        return false;
+    }
+
+    @Override
+    public List<MembershipPlan> findAll() {
+        return db.values().stream().toList();
+    }
+
+    @Override
+    public List<MembershipPlan> findAllById(Iterable<Long> longs) {
+        return List.of();
+    }
+
+    @Override
+    public long count() {
+        return 0;
+    }
+
+    @Override
+    public void deleteById(Long aLong) {
+
+    }
+
+    @Override
+    public void delete(MembershipPlan entity) {
+
+    }
+
+    @Override
+    public void deleteAllById(Iterable<? extends Long> longs) {
+
+    }
+
+    @Override
+    public void deleteAll(Iterable<? extends MembershipPlan> entities) {
+
+    }
+
+    @Override
+    public void deleteAll() {
+
+    }
+
+    @Override
+    public List<MembershipPlan> findAll(Sort sort) {
+        return List.of();
+    }
+
+    @Override
+    public Page<MembershipPlan> findAll(Pageable pageable) {
+        return null;
+    }
+
+    @Override
+    public List<MembershipPlan> findAllByGym(Gym gym) {
+        return db.values().stream()
+                .filter(p -> p.getGym().equals(gym)).
+                toList();
+    }
+}

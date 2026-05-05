@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.task</groupId>
-    <artifactId>gym-managment</artifactId>
+    <artifactId>gym-management</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>gym-managment</name>
-    <description>gym-managment</description>
+    <name>gym-management</name>
+    <description>gym-management</description>
     <url/>
     <licenses>
         <license/>
