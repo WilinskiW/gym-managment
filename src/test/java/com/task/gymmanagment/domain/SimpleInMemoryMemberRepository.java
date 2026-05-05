@@ -38,8 +38,10 @@ class SimpleInMemoryMemberRepository implements MemberRepository {
                                 members.getMembershipPlan().getGym().getName(),
                                 members.getMembershipPlan().getCurrency()
                         ),
-                        Collectors.mapping(m -> m.getMembershipPlan().getAmount(),
-                                Collectors.reducing(BigDecimal.ZERO, BigDecimal::add))
+                        Collectors.mapping(
+                                m -> m.getMembershipPlan().getAmount(),
+                                Collectors.reducing(BigDecimal.ZERO, BigDecimal::add)
+                        )
                 ))
                 .entrySet().stream()
                 .map(entry -> RevenueReportDto.builder()
