@@ -15,6 +15,7 @@ import com.task.gymmanagement.domain.exception.MembershipPlanNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -25,6 +26,7 @@ import static com.task.gymmanagement.domain.DomainMapper.mapToMembershipPlan;
 @Service
 @RequiredArgsConstructor
 @Log4j2
+@Transactional
 class GymManagementService {
     private final GymRepository gymRepository;
     private final MembershipPlanRepository membershipPlanRepository;
@@ -49,6 +51,7 @@ class GymManagementService {
         return addedGym.getId();
     }
 
+    @Transactional(readOnly = true)
     public List<GymDto> findAllGyms() {
         return gymRepository.findAll().stream()
                 .map(DomainMapper::mapGymToDto)
@@ -68,6 +71,7 @@ class GymManagementService {
         return membershipPlan.getId();
     }
 
+    @Transactional(readOnly = true)
     public List<MembershipPlanDto> findGymAllMembershipPlans(String gymName) {
         var gym = gymRepository.findByName(gymName).orElseThrow(() -> new GymNotFoundException(gymName));
 
@@ -97,6 +101,7 @@ class GymManagementService {
         return member.getId();
     }
 
+    @Transactional(readOnly = true)
     public List<MemberDto> findAllMembers() {
         return memberRepository.findAll().stream()
                 .map(DomainMapper::mapMemberToDto)

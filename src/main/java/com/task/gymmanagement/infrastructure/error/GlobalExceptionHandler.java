@@ -10,10 +10,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@ControllerAdvice
+@RestControllerAdvice
 @Log4j2
 public class GlobalExceptionHandler {
     private static final String DEFAULT_ERROR_MESSAGE = "An unexpected error occurred";
@@ -27,7 +27,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponseDto> handleGeneralException(Exception ex) {
         log.error(DEFAULT_ERROR_MESSAGE, ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorResponseDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred"));
+                .body(new ErrorResponseDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), DEFAULT_ERROR_MESSAGE));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
