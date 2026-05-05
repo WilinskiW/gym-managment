@@ -13,6 +13,8 @@ import com.task.gymmanagement.domain.exception.MemberNotFoundException;
 import com.task.gymmanagement.domain.exception.MembershipPlanExceedLimitException;
 import com.task.gymmanagement.domain.exception.MembershipPlanNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -127,271 +129,298 @@ public class GymManagementFacadeTest {
                 .build();
     }
 
-    @Test
-    void should_add_gym_if_doesnt_exist() {
-        // given
-        var request = gymRequest(DEFAULT_GYM_NAME);
+    @Nested
+    class GymTests {
+        @Test
+        @DisplayName("Should add gym if doesn't exists")
+        void should_add_gym_if_doesnt_exist() {
+            // given
+            var request = gymRequest(DEFAULT_GYM_NAME);
 
-        // when
-        var dto = facade.addGym(request);
+            // when
+            var dto = facade.addGym(request);
 
-        // then
-        assertThat(dto.id()).isEqualTo(FIRST_GYM_ID);
+            // then
+            assertThat(dto.id()).isEqualTo(FIRST_GYM_ID);
+        }
+
+        @Test
+        @DisplayName("Should throw exception if gym already exists")
+        void should_throw_exception_if_gym_already_exists() {
+            // given
+            var firstRequest = gymRequest(DEFAULT_GYM_NAME);
+            var secondRequest = gymRequest(DEFAULT_GYM_NAME);
+
+            // when
+            facade.addGym(firstRequest);
+
+            // then
+            assertThatThrownBy(() -> facade.addGym(secondRequest))
+                    .isInstanceOf(GymAlreadyExistException.class)
+                    .hasMessage("Gym with name Test gym already exists");
+        }
+
+        @Test
+        @DisplayName("Should list all existing gyms")
+        void should_list_all_gyms() {
+            // given
+            givenGymExists();
+            givenGymExists("Test gym 2");
+            givenGymExists("Test gym 3");
+
+            // when
+            List<GymDto> gyms = facade.getAllGyms();
+
+            // then
+            assertThat(gyms).hasSize(3);
+            assertThat(gyms).
+                    extracting(GymDto::name)
+                    .containsExactlyInAnyOrder("Test gym", "Test gym 2", "Test gym 3");
+        }
     }
 
-    @Test
-    void should_throw_exception_if_gym_already_exists() {
-        // given
-        var firstRequest = gymRequest(DEFAULT_GYM_NAME);
-        var secondRequest = gymRequest(DEFAULT_GYM_NAME);
+    @Nested
+    class MembershipPlanTests {
+        @Test
+        @DisplayName("Should add new membership plan to existing gym")
+        void should_add_new_membership_to_existing_gym() {
+            // given
+            givenGymExists();
 
-        // when
-        facade.addGym(firstRequest);
+            // when
+            var dto = facade.addMembershipToGym(membershipPlanRequest(FIRST_GYM_ID));
 
-        // then
-        assertThatThrownBy(() -> facade.addGym(secondRequest))
-                .isInstanceOf(GymAlreadyExistException.class)
-                .hasMessage("Gym with name Test gym already exists");
+            // then
+            assertThat(dto.id()).isEqualTo(FIRST_MEMBERSHIP_PLAN_ID);
+        }
+
+        @Test
+        @DisplayName("Should throw exception when trying to add membership plan to non-existing gym")
+        void should_throw_exception_when_membership_plan_want_to_be_added_while_gym_doesnt_exist() {
+            // given
+            var membershipPlanRequest = membershipPlanRequest(FIRST_GYM_ID);
+
+            // when & then
+            assertThatThrownBy(() -> facade.addMembershipToGym(membershipPlanRequest))
+                    .isInstanceOf(GymNotFoundException.class)
+                    .hasMessage("Gym with ID: 1 not found");
+        }
+
+        @Test
+        @DisplayName("Should list all membership plans for existing gym")
+        void should_list_all_membership_plans_for_existing_gym() {
+            // given
+            givenMembershipPlanExists();
+
+            facade.addMembershipToGym(membershipPlanRequest(
+                    FIRST_GYM_ID,
+                    BigDecimal.valueOf(500),
+                    "PLN"
+            ));
+
+            // when
+            var membershipPlans = facade.getGymAllMembershipPlans(FIRST_GYM_ID);
+
+            // then
+            assertThat(membershipPlans)
+                    .hasSize(2)
+                    .extracting(MembershipPlanDto::currency)
+                    .containsExactlyInAnyOrder("USD", "PLN");
+        }
+
+        @Test
+        @DisplayName("Should throw exception when trying to list membership plans for non-existing gym")
+        void should_throw_exception_when_gym_doesnt_exist_while_trying_to_list_membership_plans() {
+            // when & then
+            assertThatThrownBy(() -> facade.getGymAllMembershipPlans(FIRST_GYM_ID))
+                    .isInstanceOf(GymNotFoundException.class)
+                    .hasMessage("Gym with ID: 1 not found");
+        }
     }
 
-    @Test
-    void should_list_all_gyms() {
-        // given
-        givenGymExists();
-        givenGymExists("Test gym 2");
-        givenGymExists("Test gym 3");
+    @Nested
+    class MemberTests {
+        @Test
+        @DisplayName("Should add new member to existing membership plan when limit is not exceeded")
+        void should_add_new_members_to_existing_membership_plan_when_members_amount_is_in_bound() {
+            // given
+            givenMembershipPlanExists();
 
-        // when
-        List<GymDto> gyms = facade.getAllGyms();
+            var firstMember = memberRequest(
+                    FIRST_MEMBERSHIP_PLAN_ID,
+                    "Jan Kowalski",
+                    "test@gmail.com"
+            );
 
-        // then
-        assertThat(gyms).hasSize(3);
-        assertThat(gyms).
-                extracting(GymDto::name)
-                .containsExactlyInAnyOrder("Test gym", "Test gym 2", "Test gym 3");
+            var secondMember = memberRequest(
+                    FIRST_MEMBERSHIP_PLAN_ID,
+                    "Bill Nowak",
+                    "test@example.com"
+            );
+
+            // when
+            var firstMemberDto = facade.registerMember(firstMember);
+            var secondMemberDto = facade.registerMember(secondMember);
+
+            // then
+            assertThat(firstMemberDto.id()).isEqualTo(FIRST_MEMBER_ID);
+            assertThat(secondMemberDto.id()).isEqualTo(2L);
+        }
+
+        @Test
+        @DisplayName("Should throw exception when adding new member to existing membership plan when limit is exceeded")
+        void should_throw_exception_when_new_member_is_out_of_bound() {
+            // given
+            givenMembershipPlanExists(1);
+
+            facade.registerMember(memberRequest(FIRST_MEMBERSHIP_PLAN_ID));
+
+            var secondMember = memberRequest(
+                    FIRST_MEMBERSHIP_PLAN_ID,
+                    "Bill Nowak",
+                    "test@example.com"
+            );
+
+            // when & then
+            assertThatThrownBy(() -> facade.registerMember(secondMember))
+                    .isInstanceOf(MembershipPlanExceedLimitException.class)
+                    .hasMessage("Exceeded maximum members: 1 for a given Membership plan with ID: 1");
+        }
+
+        @Test
+        @DisplayName("Should throw exception when adding new member to non-existing membership plan")
+        void should_throw_exception_membership_plan_not_found_while_adding_new_member() {
+            // given
+            givenGymExists();
+
+            var member = memberRequest(FIRST_MEMBERSHIP_PLAN_ID);
+
+            // when & then
+            assertThatThrownBy(() -> facade.registerMember(member))
+                    .isInstanceOf(MembershipPlanNotFoundException.class)
+                    .hasMessage("Membership plan with ID: 1 not found");
+        }
+
+        @Test
+        @DisplayName("Should list all members for existing membership plan")
+        void should_list_all_members() {
+            // given
+            givenMembershipPlanExists();
+
+            facade.registerMember(memberRequest(
+                    FIRST_MEMBERSHIP_PLAN_ID,
+                    "Jan Kowalski",
+                    "test@gmail.com"
+            ));
+
+            facade.registerMember(memberRequest(
+                    FIRST_MEMBERSHIP_PLAN_ID,
+                    "Bill Nowak",
+                    "test@example.com"
+            ));
+
+            // when
+            List<MemberDto> members = facade.getAllMembers();
+
+            // then
+            assertThat(members)
+                    .hasSize(2)
+                    .extracting(MemberDto::name, MemberDto::membershipPlan, MemberDto::status)
+                    .containsExactlyInAnyOrder(
+                            tuple("Jan Kowalski", DEFAULT_PLAN_NAME, MemberStatus.ACTIVE),
+                            tuple("Bill Nowak", DEFAULT_PLAN_NAME, MemberStatus.ACTIVE)
+                    );
+        }
+
+        @Test
+        @DisplayName("Should return empty list when there are no members")
+        void should_return_empty_list_when_there_are_no_members() {
+            // when
+            List<MemberDto> members = facade.getAllMembers();
+
+            // then
+            assertThat(members).isEmpty();
+        }
+
+        @Test
+        @DisplayName("Should cancel membership for specify member")
+        void should_cancel_membership_for_specify_member() {
+            // given
+            givenMemberExists();
+
+            // when
+            facade.cancelMembership(FIRST_MEMBER_ID);
+
+            // then
+            assertThat(facade.getAllMembers())
+                    .singleElement()
+                    .extracting(MemberDto::status)
+                    .isEqualTo(MemberStatus.CANCELLED);
+        }
+
+        @Test
+        @DisplayName("Should throw exception when trying to cancel non-existing member")
+        void should_throw_exception_when_trying_to_cancel_non_existing_member() {
+            // when & then
+            assertThatThrownBy(() -> facade.cancelMembership(FIRST_MEMBER_ID))
+                    .isInstanceOf(MemberNotFoundException.class)
+                    .hasMessage("Member with ID: 1 not found");
+        }
     }
 
-    @Test
-    void should_add_new_membership_to_existing_gym() {
-        // given
-        givenGymExists();
+    @Nested
+    class RevenueReportTests {
+        @Test
+        @DisplayName("Should return correct revenue")
+        void should_return_correct_revenue() {
+            // given
+            givenGymExists();
 
-        // when
-        var dto = facade.addMembershipToGym(membershipPlanRequest(FIRST_GYM_ID));
+            facade.addMembershipToGym(membershipPlanRequest(
+                    FIRST_GYM_ID,
+                    BigDecimal.valueOf(100),
+                    "USD"
+            ));
 
-        // then
-        assertThat(dto.id()).isEqualTo(FIRST_MEMBERSHIP_PLAN_ID);
-    }
+            facade.addMembershipToGym(membershipPlanRequest(
+                    FIRST_GYM_ID,
+                    BigDecimal.valueOf(120),
+                    "GBP"
+            ));
 
-    @Test
-    void should_throw_exception_when_membership_plan_want_to_be_added_while_gym_doesnt_exist() {
-        // given
-        var membershipPlanRequest = membershipPlanRequest(FIRST_GYM_ID);
+            facade.registerMember(memberRequest(
+                    1L,
+                    "Jan Kowalski",
+                    "test@gmail.com"
+            ));
 
-        // when & then
-        assertThatThrownBy(() -> facade.addMembershipToGym(membershipPlanRequest))
-                .isInstanceOf(GymNotFoundException.class)
-                .hasMessage("Gym with ID: 1 not found");
-    }
+            facade.registerMember(memberRequest(
+                    1L,
+                    "Anna Nowak",
+                    "anna.nowak@example.com"
+            ));
 
-    @Test
-    void should_list_all_membership_plans_for_existing_gym() {
-        // given
-        givenMembershipPlanExists();
+            facade.registerMember(memberRequest(
+                    2L,
+                    "Bill Clinton",
+                    "test@example.com"
+            ));
 
-        facade.addMembershipToGym(membershipPlanRequest(
-                FIRST_GYM_ID,
-                BigDecimal.valueOf(500),
-                "PLN"
-        ));
+            // when
+            var revenueReport = facade.getRevenueReport();
 
-        // when
-        var membershipPlans = facade.getGymAllMembershipPlans(FIRST_GYM_ID);
-
-        // then
-        assertThat(membershipPlans)
-                .hasSize(2)
-                .extracting(MembershipPlanDto::currency)
-                .containsExactlyInAnyOrder("USD", "PLN");
-    }
-
-    @Test
-    void should_throw_exception_when_gym_doesnt_exist_while_trying_to_list_membership_plans() {
-        // when & then
-        assertThatThrownBy(() -> facade.getGymAllMembershipPlans(FIRST_GYM_ID))
-                .isInstanceOf(GymNotFoundException.class)
-                .hasMessage("Gym with ID: 1 not found");
-    }
-
-    @Test
-    void should_add_new_members_to_existing_membership_plan_when_members_amount_is_in_bound() {
-        // given
-        givenMembershipPlanExists();
-
-        var firstMember = memberRequest(
-                FIRST_MEMBERSHIP_PLAN_ID,
-                "Jan Kowalski",
-                "test@gmail.com"
-        );
-
-        var secondMember = memberRequest(
-                FIRST_MEMBERSHIP_PLAN_ID,
-                "Bill Nowak",
-                "test@example.com"
-        );
-
-        // when
-        var firstMemberDto = facade.registerMember(firstMember);
-        var secondMemberDto = facade.registerMember(secondMember);
-
-        // then
-        assertThat(firstMemberDto.id()).isEqualTo(FIRST_MEMBER_ID);
-        assertThat(secondMemberDto.id()).isEqualTo(2L);
-    }
-
-    @Test
-    void should_throw_exception_when_new_member_is_out_of_bound() {
-        // given
-        givenMembershipPlanExists(1);
-
-        facade.registerMember(memberRequest(FIRST_MEMBERSHIP_PLAN_ID));
-
-        var secondMember = memberRequest(
-                FIRST_MEMBERSHIP_PLAN_ID,
-                "Bill Nowak",
-                "test@example.com"
-        );
-
-        // when & then
-        assertThatThrownBy(() -> facade.registerMember(secondMember))
-                .isInstanceOf(MembershipPlanExceedLimitException.class)
-                .hasMessage("Exceeded maximum members: 1 for a given Membership plan with ID: 1");
-    }
-
-    @Test
-    void should_throw_exception_membership_plan_not_found_while_adding_new_member() {
-        // given
-        givenGymExists();
-
-        var member = memberRequest(FIRST_MEMBERSHIP_PLAN_ID);
-
-        // when & then
-        assertThatThrownBy(() -> facade.registerMember(member))
-                .isInstanceOf(MembershipPlanNotFoundException.class)
-                .hasMessage("Membership plan with ID: 1 not found");
-    }
-
-    @Test
-    void should_list_all_members() {
-        // given
-        givenMembershipPlanExists();
-
-        facade.registerMember(memberRequest(
-                FIRST_MEMBERSHIP_PLAN_ID,
-                "Jan Kowalski",
-                "test@gmail.com"
-        ));
-
-        facade.registerMember(memberRequest(
-                FIRST_MEMBERSHIP_PLAN_ID,
-                "Bill Nowak",
-                "test@example.com"
-        ));
-
-        // when
-        List<MemberDto> members = facade.getAllMembers();
-
-        // then
-        assertThat(members)
-                .hasSize(2)
-                .extracting(MemberDto::name, MemberDto::membershipPlan, MemberDto::status)
-                .containsExactlyInAnyOrder(
-                        tuple("Jan Kowalski", DEFAULT_PLAN_NAME, MemberStatus.ACTIVE),
-                        tuple("Bill Nowak", DEFAULT_PLAN_NAME, MemberStatus.ACTIVE)
-                );
-    }
-
-    @Test
-    void should_return_empty_list_when_there_are_no_members() {
-        // when
-        List<MemberDto> members = facade.getAllMembers();
-
-        // then
-        assertThat(members).isEmpty();
-    }
-
-    @Test
-    void should_cancel_membership_for_specify_member() {
-        // given
-        givenMemberExists();
-
-        // when
-        facade.cancelMembership(FIRST_MEMBER_ID);
-
-        // then
-        assertThat(facade.getAllMembers())
-                .singleElement()
-                .extracting(MemberDto::status)
-                .isEqualTo(MemberStatus.CANCELLED);
-    }
-
-    @Test
-    void should_throw_exception_when_trying_to_cancel_non_existing_member() {
-        // when & then
-        assertThatThrownBy(() -> facade.cancelMembership(FIRST_MEMBER_ID))
-                .isInstanceOf(MemberNotFoundException.class)
-                .hasMessage("Member with ID: 1 not found");
-    }
-
-    @Test
-    void should_return_correct_revenue() {
-        // given
-        givenGymExists();
-
-        facade.addMembershipToGym(membershipPlanRequest(
-                FIRST_GYM_ID,
-                BigDecimal.valueOf(100),
-                "USD"
-        ));
-
-        facade.addMembershipToGym(membershipPlanRequest(
-                FIRST_GYM_ID,
-                BigDecimal.valueOf(120),
-                "GBP"
-        ));
-
-        facade.registerMember(memberRequest(
-                1L,
-                "Jan Kowalski",
-                "test@gmail.com"
-        ));
-
-        facade.registerMember(memberRequest(
-                1L,
-                "Anna Nowak",
-                "anna.nowak@example.com"
-        ));
-
-        facade.registerMember(memberRequest(
-                2L,
-                "Bill Clinton",
-                "test@example.com"
-        ));
-
-        // when
-        var revenueReport = facade.getRevenueReport();
-
-        // then
-        assertThat(revenueReport)
-                .hasSize(2)
-                .extracting(
-                        RevenueReportDto::gymName,
-                        RevenueReportDto::amount,
-                        RevenueReportDto::currency
-                )
-                .containsExactlyInAnyOrder(
-                        tuple(DEFAULT_GYM_NAME, BigDecimal.valueOf(200), "USD"),
-                        tuple(DEFAULT_GYM_NAME, BigDecimal.valueOf(120), "GBP")
-                );
+            // then
+            assertThat(revenueReport)
+                    .hasSize(2)
+                    .extracting(
+                            RevenueReportDto::gymName,
+                            RevenueReportDto::amount,
+                            RevenueReportDto::currency
+                    )
+                    .containsExactlyInAnyOrder(
+                            tuple(DEFAULT_GYM_NAME, BigDecimal.valueOf(200), "USD"),
+                            tuple(DEFAULT_GYM_NAME, BigDecimal.valueOf(120), "GBP")
+                    );
+        }
     }
 }
