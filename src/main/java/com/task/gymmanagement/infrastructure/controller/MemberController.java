@@ -36,6 +36,6 @@ public class MemberController {
     @PatchMapping("/{memberId}/cancel")
     public ResponseEntity<Void> cancelMembership(@PathVariable Long memberId) {
         managementFacade.cancelMembership(memberId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 }
