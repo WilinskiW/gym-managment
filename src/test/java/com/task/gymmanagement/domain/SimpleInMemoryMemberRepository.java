@@ -137,13 +137,13 @@ class SimpleInMemoryMemberRepository implements MemberRepository {
 
     @Override
     public <S extends Member> S save(final S entity) {
-        Long id = idGenerator.getAndIncrement();
         if (entity.getId() == null) {
+            Long id = idGenerator.getAndIncrement();
             entity.setId(id);
             entity.setStatus(MemberStatus.ACTIVE);
             entity.setStartDate(Instant.now());
         }
-        db.put(id, entity);
+        db.put(entity.getId(), entity);
         return entity;
     }
 

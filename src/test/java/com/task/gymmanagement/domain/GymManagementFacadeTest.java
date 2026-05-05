@@ -5,6 +5,8 @@ import com.task.gymmanagement.domain.dto.request.AddMemberRequestDto;
 import com.task.gymmanagement.domain.dto.request.AddMembershipPlanRequestDto;
 import com.task.gymmanagement.domain.dto.response.GymDto;
 import com.task.gymmanagement.domain.dto.response.MemberDto;
+import com.task.gymmanagement.domain.dto.response.MembershipPlanDto;
+import com.task.gymmanagement.domain.dto.response.RevenueReportDto;
 import com.task.gymmanagement.domain.exception.GymAlreadyExistException;
 import com.task.gymmanagement.domain.exception.GymNotFoundException;
 import com.task.gymmanagement.domain.exception.MemberNotFoundException;
@@ -18,8 +20,27 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.tuple;
 
 public class GymManagementFacadeTest {
+    private static final Long FIRST_GYM_ID = 1L;
+    private static final Long FIRST_MEMBERSHIP_PLAN_ID = 1L;
+    private static final Long FIRST_MEMBER_ID = 1L;
+
+    private static final String DEFAULT_GYM_NAME = "Test gym";
+    private static final String DEFAULT_GYM_ADDRESS = "Test address";
+    private static final String DEFAULT_PHONE_NUMBER = "123456789";
+
+    private static final String DEFAULT_PLAN_NAME = "Test plan";
+    private static final MembershipType DEFAULT_MEMBERSHIP_TYPE = MembershipType.BASIC;
+    private static final BigDecimal DEFAULT_AMOUNT = BigDecimal.valueOf(100);
+    private static final String DEFAULT_CURRENCY = "USD";
+    private static final int DEFAULT_DURATION = 1;
+    private static final int DEFAULT_MAX_MEMBERS = 2;
+
+    private static final String DEFAULT_MEMBER_NAME = "Jan Kowalski";
+    private static final String DEFAULT_MEMBER_EMAIL = "test@gmail.com";
+
     private GymManagementFacade facade = createFacade();
 
     @BeforeEach
@@ -28,35 +49,101 @@ public class GymManagementFacadeTest {
     }
 
     private static GymManagementFacade createFacade() {
-        return new GymManagementFacade(new GymManagementService
-                (
-                        new SimpleInMemoryGymRepository(),
-                        new SimpleInMemoryMembershipPlanRepository(),
-                        new SimpleInMemoryMemberRepository()
-                ));
+        return new GymManagementFacade(new GymManagementService(
+                new SimpleInMemoryGymRepository(),
+                new SimpleInMemoryMembershipPlanRepository(),
+                new SimpleInMemoryMemberRepository()
+        ));
+    }
+
+    private void givenGymExists() {
+        facade.addGym(gymRequest(DEFAULT_GYM_NAME));
+    }
+
+    private void givenGymExists(String name) {
+        facade.addGym(gymRequest(name));
+    }
+
+    private void givenMembershipPlanExists() {
+        givenGymExists();
+        facade.addMembershipToGym(membershipPlanRequest(FIRST_GYM_ID));
+    }
+
+    private void givenMembershipPlanExists(int maxMembers) {
+        givenGymExists();
+        facade.addMembershipToGym(membershipPlanRequest(FIRST_GYM_ID, maxMembers));
+    }
+
+    private void givenMemberExists() {
+        givenMembershipPlanExists();
+        facade.registerMember(memberRequest(FIRST_MEMBERSHIP_PLAN_ID));
+    }
+
+    private AddGymRequestDto gymRequest(String name) {
+        return AddGymRequestDto.builder()
+                .name(name)
+                .address(DEFAULT_GYM_ADDRESS)
+                .phoneNumber(DEFAULT_PHONE_NUMBER)
+                .build();
+    }
+
+    private AddMembershipPlanRequestDto membershipPlanRequest(Long gymId) {
+        return membershipPlanRequest(gymId, DEFAULT_MAX_MEMBERS);
+    }
+
+    private AddMembershipPlanRequestDto membershipPlanRequest(Long gymId, int maxMembers) {
+        return AddMembershipPlanRequestDto.builder()
+                .name(DEFAULT_PLAN_NAME)
+                .type(DEFAULT_MEMBERSHIP_TYPE)
+                .amount(DEFAULT_AMOUNT)
+                .currency(DEFAULT_CURRENCY)
+                .duration(DEFAULT_DURATION)
+                .maxMembers(maxMembers)
+                .gymId(gymId)
+                .build();
+    }
+
+    private AddMembershipPlanRequestDto membershipPlanRequest(Long gymId, BigDecimal amount, String currency) {
+        return AddMembershipPlanRequestDto.builder()
+                .name(DEFAULT_PLAN_NAME)
+                .type(DEFAULT_MEMBERSHIP_TYPE)
+                .amount(amount)
+                .currency(currency)
+                .duration(DEFAULT_DURATION)
+                .maxMembers(DEFAULT_MAX_MEMBERS)
+                .gymId(gymId)
+                .build();
+    }
+
+    private AddMemberRequestDto memberRequest(Long membershipPlanId) {
+        return memberRequest(membershipPlanId, DEFAULT_MEMBER_NAME, DEFAULT_MEMBER_EMAIL);
+    }
+
+    private AddMemberRequestDto memberRequest(Long membershipPlanId, String fullName, String email) {
+        return AddMemberRequestDto.builder()
+                .membershipId(membershipPlanId)
+                .fullName(fullName)
+                .email(email)
+                .build();
     }
 
     @Test
     void should_add_gym_if_doesnt_exist() {
         // given
-        var request = AddGymRequestDto.builder()
-                .name("Test gym")
-                .address("Test addres")
-                .phoneNumber("123456789")
-                .build();
+        var request = gymRequest(DEFAULT_GYM_NAME);
 
         // when
         var dto = facade.addGym(request);
 
         // then
-        assertThat(dto.id()).isEqualTo(1);
+        assertThat(dto.id()).isEqualTo(FIRST_GYM_ID);
     }
 
     @Test
     void should_throw_exception_if_gym_already_exists() {
         // given
-        var firstRequest = createAddGymRequest("Test gym");
-        var secondRequest = createAddGymRequest("  Test gym  ");
+        var firstRequest = gymRequest(DEFAULT_GYM_NAME);
+        var secondRequest = gymRequest(DEFAULT_GYM_NAME);
 
         // when
         facade.addGym(firstRequest);
@@ -67,65 +154,39 @@ public class GymManagementFacadeTest {
                 .hasMessage("Gym with name Test gym already exists");
     }
 
-    private AddGymRequestDto createAddGymRequest(String name) {
-        return AddGymRequestDto.builder()
-                .name(name)
-                .address("Test address")
-                .phoneNumber("123456789")
-                .build();
-    }
-
     @Test
     void should_list_all_gyms() {
         // given
-        facade.addGym(createAddGymRequest("Test gym 1"));
-        facade.addGym(createAddGymRequest("Test gym 2"));
-        facade.addGym(createAddGymRequest("Test gym 3"));
+        givenGymExists();
+        givenGymExists("Test gym 2");
+        givenGymExists("Test gym 3");
 
         // when
         List<GymDto> gyms = facade.getAllGyms();
 
         // then
         assertThat(gyms).hasSize(3);
-        assertThat(gyms.getFirst().name()).isEqualTo("Test gym 1");
-        assertThat(gyms.get(1).name()).isEqualTo("Test gym 2");
-        assertThat(gyms.getLast().name()).isEqualTo("Test gym 3");
+        assertThat(gyms).
+                extracting(GymDto::name)
+                .containsExactlyInAnyOrder("Test gym", "Test gym 2", "Test gym 3");
     }
 
     @Test
     void should_add_new_membership_to_existing_gym() {
         // given
-        facade.addGym(createAddGymRequest("Test gym"));
-
-        var membershipPlanRequest = AddMembershipPlanRequestDto.builder()
-                .name("Test plan")
-                .type(MembershipType.BASIC)
-                .amount(BigDecimal.valueOf(100))
-                .currency("USD")
-                .duration(1)
-                .maxMembers(1)
-                .gymId(1L)
-                .build();
+        givenGymExists();
 
         // when
-        var dto = facade.addMembershipToGym(membershipPlanRequest);
+        var dto = facade.addMembershipToGym(membershipPlanRequest(FIRST_GYM_ID));
 
         // then
-        assertThat(dto.id()).isEqualTo(1);
+        assertThat(dto.id()).isEqualTo(FIRST_MEMBERSHIP_PLAN_ID);
     }
 
     @Test
     void should_throw_exception_when_membership_plan_want_to_be_added_while_gym_doesnt_exist() {
         // given
-        var membershipPlanRequest = AddMembershipPlanRequestDto.builder()
-                .name("Test plan")
-                .type(MembershipType.BASIC)
-                .amount(BigDecimal.valueOf(100))
-                .currency("USD")
-                .duration(1)
-                .maxMembers(1)
-                .gymId(1L)
-                .build();
+        var membershipPlanRequest = membershipPlanRequest(FIRST_GYM_ID);
 
         // when & then
         assertThatThrownBy(() -> facade.addMembershipToGym(membershipPlanRequest))
@@ -136,44 +197,28 @@ public class GymManagementFacadeTest {
     @Test
     void should_list_all_membership_plans_for_existing_gym() {
         // given
-        facade.addGym(createAddGymRequest("Test gym"));
+        givenMembershipPlanExists();
 
-        var membershipPlan1 = AddMembershipPlanRequestDto.builder()
-                .name("Test plan")
-                .type(MembershipType.BASIC)
-                .amount(BigDecimal.valueOf(100))
-                .currency("USD")
-                .duration(1)
-                .maxMembers(1)
-                .gymId(1L)
-                .build();
-
-        var membershipPlan2 = AddMembershipPlanRequestDto.builder()
-                .name("Test plan")
-                .type(MembershipType.BASIC)
-                .amount(BigDecimal.valueOf(500))
-                .currency("PLN")
-                .duration(1)
-                .maxMembers(1)
-                .gymId(1L)
-                .build();
-
-
-        facade.addMembershipToGym(membershipPlan1);
-        facade.addMembershipToGym(membershipPlan2);
+        facade.addMembershipToGym(membershipPlanRequest(
+                FIRST_GYM_ID,
+                BigDecimal.valueOf(500),
+                "PLN"
+        ));
 
         // when
-        var membershipPlans = facade.getGymAllMembershipPlans(1L);
+        var membershipPlans = facade.getGymAllMembershipPlans(FIRST_GYM_ID);
 
         // then
-        assertThat(membershipPlans).hasSize(2);
-        assertThat(membershipPlans.getFirst().currency()).isEqualTo("USD");
-        assertThat(membershipPlans.getLast().currency()).isEqualTo("PLN");
+        assertThat(membershipPlans)
+                .hasSize(2)
+                .extracting(MembershipPlanDto::currency)
+                .containsExactlyInAnyOrder("USD", "PLN");
     }
 
     @Test
     void should_throw_exception_when_gym_doesnt_exist_while_trying_to_list_membership_plans() {
-        assertThatThrownBy(() -> facade.getGymAllMembershipPlans(1L))
+        // when & then
+        assertThatThrownBy(() -> facade.getGymAllMembershipPlans(FIRST_GYM_ID))
                 .isInstanceOf(GymNotFoundException.class)
                 .hasMessage("Gym with ID: 1 not found");
     }
@@ -181,74 +226,44 @@ public class GymManagementFacadeTest {
     @Test
     void should_add_new_members_to_existing_membership_plan_when_members_amount_is_in_bound() {
         // given
-        facade.addGym(createAddGymRequest("Test gym"));
+        givenMembershipPlanExists();
 
-        var membershipPlan = AddMembershipPlanRequestDto.builder()
-                .name("Test plan")
-                .type(MembershipType.BASIC)
-                .amount(BigDecimal.valueOf(100))
-                .currency("USD")
-                .duration(1)
-                .maxMembers(2)
-                .gymId(1L)
-                .build();
+        var firstMember = memberRequest(
+                FIRST_MEMBERSHIP_PLAN_ID,
+                "Jan Kowalski",
+                "test@gmail.com"
+        );
 
-        facade.addMembershipToGym(membershipPlan);
-
-        var member1 = AddMemberRequestDto.builder()
-                .membershipId(1L)
-                .fullName("Jan Kowalski")
-                .email("test@gmail.com")
-                .build();
-
-        var member2 = AddMemberRequestDto.builder()
-                .membershipId(1L)
-                .fullName("Bill Nowak")
-                .email("test@example.com")
-                .build();
+        var secondMember = memberRequest(
+                FIRST_MEMBERSHIP_PLAN_ID,
+                "Bill Nowak",
+                "test@example.com"
+        );
 
         // when
-        var memberDto1 = facade.registerMember(member1);
-        var memberDto2 = facade.registerMember(member2);
+        var firstMemberDto = facade.registerMember(firstMember);
+        var secondMemberDto = facade.registerMember(secondMember);
 
         // then
-        assertThat(memberDto1.id()).isEqualTo(1);
-        assertThat(memberDto2.id()).isEqualTo(2);
+        assertThat(firstMemberDto.id()).isEqualTo(FIRST_MEMBER_ID);
+        assertThat(secondMemberDto.id()).isEqualTo(2L);
     }
 
     @Test
     void should_throw_exception_when_new_member_is_out_of_bound() {
         // given
-        facade.addGym(createAddGymRequest("Test gym"));
+        givenMembershipPlanExists(1);
 
-        var membershipPlan = AddMembershipPlanRequestDto.builder()
-                .name("Test plan")
-                .type(MembershipType.BASIC)
-                .amount(BigDecimal.valueOf(100))
-                .currency("USD")
-                .duration(1)
-                .maxMembers(1)
-                .gymId(1L)
-                .build();
+        facade.registerMember(memberRequest(FIRST_MEMBERSHIP_PLAN_ID));
 
-        facade.addMembershipToGym(membershipPlan);
-
-        var member1 = AddMemberRequestDto.builder()
-                .membershipId(1L)
-                .fullName("Jan Kowalski")
-                .email("test@gmail.com")
-                .build();
-
-        var member2 = AddMemberRequestDto.builder()
-                .membershipId(1L)
-                .fullName("Bill Nowak")
-                .email("test@example.com")
-                .build();
-
-        facade.registerMember(member1);
+        var secondMember = memberRequest(
+                FIRST_MEMBERSHIP_PLAN_ID,
+                "Bill Nowak",
+                "test@example.com"
+        );
 
         // when & then
-        assertThatThrownBy(() -> facade.registerMember(member2))
+        assertThatThrownBy(() -> facade.registerMember(secondMember))
                 .isInstanceOf(MembershipPlanExceedLimitException.class)
                 .hasMessage("Exceeded maximum members: 1 for a given Membership plan with ID: 1");
     }
@@ -256,13 +271,9 @@ public class GymManagementFacadeTest {
     @Test
     void should_throw_exception_membership_plan_not_found_while_adding_new_member() {
         // given
-        facade.addGym(createAddGymRequest("Test gym"));
+        givenGymExists();
 
-        var member = AddMemberRequestDto.builder()
-                .membershipId(1L)
-                .fullName("Jan Kowalski")
-                .email("test@gmail.com")
-                .build();
+        var member = memberRequest(FIRST_MEMBERSHIP_PLAN_ID);
 
         // when & then
         assertThatThrownBy(() -> facade.registerMember(member))
@@ -273,98 +284,61 @@ public class GymManagementFacadeTest {
     @Test
     void should_list_all_members() {
         // given
-        facade.addGym(createAddGymRequest("Test gym"));
+        givenMembershipPlanExists();
 
-        var membershipPlan = AddMembershipPlanRequestDto.builder()
-                .name("Test plan")
-                .type(MembershipType.BASIC)
-                .amount(BigDecimal.valueOf(100))
-                .currency("USD")
-                .duration(1)
-                .maxMembers(2)
-                .gymId(1L)
-                .build();
+        facade.registerMember(memberRequest(
+                FIRST_MEMBERSHIP_PLAN_ID,
+                "Jan Kowalski",
+                "test@gmail.com"
+        ));
 
-        facade.addMembershipToGym(membershipPlan);
-
-        var member1 = AddMemberRequestDto.builder()
-                .membershipId(1L)
-                .fullName("Jan Kowalski")
-                .email("test@gmail.com")
-                .build();
-
-        var member2 = AddMemberRequestDto.builder()
-                .membershipId(1L)
-                .fullName("Bill Nowak")
-                .email("test@example.com")
-                .build();
-
-        facade.registerMember(member1);
-        facade.registerMember(member2);
+        facade.registerMember(memberRequest(
+                FIRST_MEMBERSHIP_PLAN_ID,
+                "Bill Nowak",
+                "test@example.com"
+        ));
 
         // when
-        List<MemberDto> dtos = facade.getAllMembers();
+        List<MemberDto> members = facade.getAllMembers();
 
         // then
-        assertThat(dtos).hasSize(2);
-        assertThat(dtos.getFirst())
-                .matches(dto -> dto.name().equals("Jan Kowalski"))
-                .matches(dto -> dto.membershipPlan().equals("Test plan"))
-                .matches(dto -> dto.status().equals(MemberStatus.ACTIVE));
-
-        assertThat(dtos.getLast())
-                .matches(dto -> dto.name().equals("Bill Nowak"))
-                .matches(dto -> dto.membershipPlan().equals("Test plan"))
-                .matches(dto -> dto.status().equals(MemberStatus.ACTIVE));
-
+        assertThat(members)
+                .hasSize(2)
+                .extracting(MemberDto::name, MemberDto::membershipPlan, MemberDto::status)
+                .containsExactlyInAnyOrder(
+                        tuple("Jan Kowalski", DEFAULT_PLAN_NAME, MemberStatus.ACTIVE),
+                        tuple("Bill Nowak", DEFAULT_PLAN_NAME, MemberStatus.ACTIVE)
+                );
     }
 
     @Test
     void should_return_empty_list_when_there_are_no_members() {
         // when
-        List<MemberDto> dtos = facade.getAllMembers();
+        List<MemberDto> members = facade.getAllMembers();
 
         // then
-        assertThat(dtos).isEmpty();
+        assertThat(members).isEmpty();
     }
 
     @Test
-    void should_canceled_membership_plan_for_specify_member() {
+    void should_cancel_membership_for_specify_member() {
         // given
-        facade.addGym(createAddGymRequest("Test gym"));
-
-        var membershipPlan = AddMembershipPlanRequestDto.builder()
-                .name("Test plan")
-                .type(MembershipType.BASIC)
-                .amount(BigDecimal.valueOf(100))
-                .currency("USD")
-                .duration(1)
-                .maxMembers(2)
-                .gymId(1L)
-                .build();
-
-        facade.addMembershipToGym(membershipPlan);
-
-        var member = AddMemberRequestDto.builder()
-                .membershipId(1L)
-                .fullName("Jan Kowalski")
-                .email("test@gmail.com")
-                .build();
-
-        facade.registerMember(member);
+        givenMemberExists();
 
         // when
-        facade.cancelMembership(1L);
+        facade.cancelMembership(FIRST_MEMBER_ID);
 
         // then
-        List<MemberDto> dtos = facade.getAllMembers();
-        assertThat(dtos.getFirst().status()).isEqualTo(MemberStatus.CANCELLED);
+        assertThat(facade.getAllMembers())
+                .singleElement()
+                .extracting(MemberDto::status)
+                .isEqualTo(MemberStatus.CANCELLED);
     }
 
     @Test
     void should_throw_exception_when_trying_to_cancel_non_existing_member() {
         // when & then
-        assertThatThrownBy(() -> facade.cancelMembership(1L))
+        assertThatThrownBy(() -> facade.cancelMembership(FIRST_MEMBER_ID))
                 .isInstanceOf(MemberNotFoundException.class)
                 .hasMessage("Member with ID: 1 not found");
     }
@@ -372,67 +346,52 @@ public class GymManagementFacadeTest {
     @Test
     void should_return_correct_revenue() {
         // given
-        facade.addGym(createAddGymRequest("Test gym"));
+        givenGymExists();
 
-        var membershipPlan1 = AddMembershipPlanRequestDto.builder()
-                .name("Test plan")
-                .type(MembershipType.BASIC)
-                .amount(BigDecimal.valueOf(100))
-                .currency("USD")
-                .duration(1)
-                .maxMembers(2)
-                .gymId(1L)
-                .build();
+        facade.addMembershipToGym(membershipPlanRequest(
+                FIRST_GYM_ID,
+                BigDecimal.valueOf(100),
+                "USD"
+        ));
 
-        var membershipPlan2 = AddMembershipPlanRequestDto.builder()
-                .name("Test plan")
-                .type(MembershipType.BASIC)
-                .amount(BigDecimal.valueOf(120))
-                .currency("GBP")
-                .duration(1)
-                .maxMembers(2)
-                .gymId(1L)
-                .build();
+        facade.addMembershipToGym(membershipPlanRequest(
+                FIRST_GYM_ID,
+                BigDecimal.valueOf(120),
+                "GBP"
+        ));
 
-        facade.addMembershipToGym(membershipPlan1);
-        facade.addMembershipToGym(membershipPlan2);
+        facade.registerMember(memberRequest(
+                1L,
+                "Jan Kowalski",
+                "test@gmail.com"
+        ));
 
-        var member1 = AddMemberRequestDto.builder()
-                .membershipId(1L)
-                .fullName("Jan Kowalski")
-                .email("test@gmail.com")
-                .build();
+        facade.registerMember(memberRequest(
+                1L,
+                "Anna Nowak",
+                "anna.nowak@example.com"
+        ));
 
-        var member2 = AddMemberRequestDto.builder()
-                .membershipId(1L)
-                .fullName("Jan Kowalski")
-                .email("test@gmail.com")
-                .build();
-
-        var member3 = AddMemberRequestDto.builder()
-                .membershipId(2L)
-                .fullName("Bill Clinton")
-                .email("test@example.com")
-                .build();
-
-        facade.registerMember(member1);
-        facade.registerMember(member2);
-        facade.registerMember(member3);
+        facade.registerMember(memberRequest(
+                2L,
+                "Bill Clinton",
+                "test@example.com"
+        ));
 
         // when
         var revenueReport = facade.getRevenueReport();
 
         // then
-        assertThat(revenueReport).hasSize(2);
-
-        assertThat(revenueReport.getFirst())
-                .matches(r -> r.gymName().equals("Test gym"))
-                .matches(r -> r.amount().equals(BigDecimal.valueOf(120)))
-                .matches(r -> r.currency().equals("GBP"));
-
-        assertThat(revenueReport.getLast())
-                .matches(r -> r.gymName().equals("Test gym"))
-                .matches(r -> r.amount().equals(BigDecimal.valueOf(200)))
-                .matches(r -> r.currency().equals("USD"));
+        assertThat(revenueReport)
+                .hasSize(2)
+                .extracting(
+                        RevenueReportDto::gymName,
+                        RevenueReportDto::amount,
+                        RevenueReportDto::currency
+                )
+                .containsExactlyInAnyOrder(
+                        tuple(DEFAULT_GYM_NAME, BigDecimal.valueOf(200), "USD"),
+                        tuple(DEFAULT_GYM_NAME, BigDecimal.valueOf(120), "GBP")
+                );
     }
 }

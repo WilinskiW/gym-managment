@@ -89,11 +89,11 @@ class SimpleInMemoryGymRepository implements GymRepository {
 
     @Override
     public <S extends Gym> S save(S entity) {
-        Long id = idGenerator.getAndIncrement();
         if (entity.getId() == null) {
+            Long id = idGenerator.getAndIncrement();
             entity.setId(id);
         }
-        db.put(id, entity);
+        db.put(entity.getId(), entity);
         return entity;
     }
 

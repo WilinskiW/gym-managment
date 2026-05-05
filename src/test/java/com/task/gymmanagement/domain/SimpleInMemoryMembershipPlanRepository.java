@@ -99,11 +99,11 @@ class SimpleInMemoryMembershipPlanRepository implements MembershipPlanRepository
 
     @Override
     public <S extends MembershipPlan> S save(S entity) {
-        Long id = idGenerator.getAndIncrement();
         if (entity.getId() == null) {
+            Long id = idGenerator.getAndIncrement();
             entity.setId(id);
         }
-        db.put(id, entity);
+        db.put(entity.getId(), entity);
         return entity;
     }
 
