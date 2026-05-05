@@ -27,11 +27,11 @@ class DomainMapper {
 
     static MembershipPlan mapToMembershipPlan(Gym gym, AddMembershipPlanRequestDto request) {
         return MembershipPlan.builder()
-                .name(request.name())
+                .name(request.name().trim())
                 .gym(gym)
                 .type(request.type())
                 .amount(request.amount())
-                .currency(request.currency())
+                .currency(request.currency().trim())
                 .durationMonths(request.duration())
                 .maxMembers(request.maxMembers())
                 .build();
@@ -52,10 +52,9 @@ class DomainMapper {
     static Member mapDtoToMember(AddMemberRequestDto dto, MembershipPlan membershipPlan){
         return Member.builder()
                 .membershipPlan(membershipPlan)
-                .fullName(dto.fullName())
-                .email(dto.email())
+                .fullName(dto.fullName().trim())
+                .email(dto.email().trim())
                 .build();
-
     }
 
     static MemberDto mapMemberToDto(Member member){
