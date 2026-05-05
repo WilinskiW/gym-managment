@@ -1,6 +1,7 @@
 package com.task.gymmanagment.domain;
 
 import com.task.gymmanagment.domain.dto.request.AddGymRequestDto;
+import com.task.gymmanagment.domain.dto.request.AddMemberRequestDto;
 import com.task.gymmanagment.domain.dto.request.AddMembershipPlanRequestDto;
 import com.task.gymmanagment.domain.dto.response.GymInfoResponseDto;
 import com.task.gymmanagment.domain.dto.response.MembershipPlanInfoResponseDto;
@@ -16,6 +17,7 @@ import java.util.List;
 class GymManagmentService {
     private final GymRepository gymRepository;
     private final MembershipPlanRepository membershipPlanRepository;
+    private final MemberRepository memberRepository;
 
     public Long createGym(AddGymRequestDto gymRequestDto) {
         var gymName = gymRequestDto.name().trim();
@@ -66,9 +68,9 @@ class GymManagmentService {
 
         MembershipPlan membershipPlan = mapDtoToMembershipPlanEntity(gym, membershipPlanRequest);
 
-        membershipPlanRepository.save(membershipPlan);
+        membershipPlan = membershipPlanRepository.save(membershipPlan);
 
-        log.info("Membership plan {} added successfully", membershipPlan.getName());
+        log.info("Membership plan {} added successfully with ID: {}", membershipPlan.getName(), membershipPlan.getId());
 
         return membershipPlan.getId();
     }
@@ -103,5 +105,35 @@ class GymManagmentService {
                 .durationMonths(membershipPlan.getDurationMonths())
                 .maxMembers(membershipPlan.getMaxMembers())
                 .build();
+    }
+
+    public Long addMemberToMembershipPlan(AddMemberRequestDto dto) {
+        var membershipPlanId = dto.membershipId();
+        var membershipPlan = membershipPlanRepository.findById(membershipPlanId)
+                        .orElseThrow(() -> new MembershipPlanNotFoundException(membershipPlanId));
+
+        var membersCount = memberRepository.countMembersByMembershipPlan(membershipPlan);
+        var maxMembers = membershipPlan.getMaxMembers();
+
+        if(membersCount >= maxMembers){
+            throw new MembershipPlanExceedLimitException(maxMembers, membershipPlanId);
+        }
+
+        var member = mapDtoToMemberEntity(dto, membershipPlan);
+        member = memberRepository.save(member);
+
+        log.info("Member with ID: {} successfully added to Membership plan with ID: {}",
+                member.getId(), membershipPlanId);
+
+        return member.getId();
+    }
+
+    private Member mapDtoToMemberEntity(AddMemberRequestDto dto, MembershipPlan membershipPlan){
+        return Member.builder()
+                .membershipPlan(membershipPlan)
+                .fullName(dto.fullName())
+                .email(dto.email())
+                .build();
+
     }
 }

@@ -51,5 +51,6 @@ class Member {
 
     @Column(name = "status", nullable = false)
     @Enumerated(value = EnumType.STRING)
+    @Builder.Default
     private MemberStatus status = MemberStatus.ACTIVE;
 }

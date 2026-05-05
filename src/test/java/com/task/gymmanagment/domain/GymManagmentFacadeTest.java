@@ -1,6 +1,7 @@
 package com.task.gymmanagment.domain;
 
 import com.task.gymmanagment.domain.dto.request.AddGymRequestDto;
+import com.task.gymmanagment.domain.dto.request.AddMemberRequestDto;
 import com.task.gymmanagment.domain.dto.request.AddMembershipPlanRequestDto;
 import com.task.gymmanagment.domain.dto.response.GymInfoResponseDto;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,7 +25,8 @@ public class GymManagmentFacadeTest {
         return new GymManagmentFacade(new GymManagmentService
                 (
                         new SimpleInMemoryGymRepository(),
-                        new SimpleInMemoryMembershipPlanRepository()
+                        new SimpleInMemoryMembershipPlanRepository(),
+                        new SimpleInMemoryMemberRepository()
                 ));
     }
 
@@ -183,5 +185,35 @@ public class GymManagmentFacadeTest {
         assertThatThrownBy(() ->  gymManagmentFacade.getGymAllMembershipPlans("Test gym"))
                 .isInstanceOf(GymNotFoundException.class)
                 .hasMessage("Gym with name Test gym not found");
+    }
+
+    @Test
+    void should_add_new_member_to_existing_membership_plan_when_members_amount_is_in_bound(){
+        // given
+        gymManagmentFacade.addGym(createAddGymRequest("Test gym"));
+
+        var membershipPlan = AddMembershipPlanRequestDto.builder()
+                .name("Test plan")
+                .type(MembershipType.BASIC)
+                .amount(BigDecimal.valueOf(100))
+                .currency("USD")
+                .duration(1)
+                .maxMembers(1)
+                .gymName("Test gym")
+                .build();
+
+        gymManagmentFacade.addMembershipToGym(membershipPlan);
+
+        var member = AddMemberRequestDto.builder()
+                .membershipId(1L)
+                .fullName("Jan Kowalski")
+                .email("test@gmail.com")
+                .build();
+
+        // when
+        Long id = gymManagmentFacade.registerMember(member);
+
+        // then
+        assertThat(id).isEqualTo(1);
     }
 }

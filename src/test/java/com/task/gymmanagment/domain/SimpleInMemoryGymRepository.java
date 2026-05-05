@@ -13,7 +13,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
-public class SimpleInMemoryGymRepository implements GymRepository {
+class SimpleInMemoryGymRepository implements GymRepository {
     private final Map<Long, Gym> db = new HashMap<>();
     private final AtomicLong idGenerator = new AtomicLong(1);
 
@@ -89,10 +89,11 @@ public class SimpleInMemoryGymRepository implements GymRepository {
 
     @Override
     public <S extends Gym> S save(S entity) {
+        Long id = idGenerator.getAndIncrement();
         if (entity.getId() == null) {
-            entity.setId(idGenerator.getAndIncrement());
+            entity.setId(id);
         }
-        db.put(idGenerator.get(), entity);
+        db.put(id, entity);
         return entity;
     }
 

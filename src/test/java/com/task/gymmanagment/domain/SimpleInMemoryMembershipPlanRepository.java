@@ -13,7 +13,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
-public class SimpleInMemoryMembershipPlanRepository implements MembershipPlanRepository {
+class SimpleInMemoryMembershipPlanRepository implements MembershipPlanRepository {
     private final Map<Long, MembershipPlan> db = new HashMap<>();
     private final AtomicLong idGenerator = new AtomicLong(1);
 
@@ -99,10 +99,11 @@ public class SimpleInMemoryMembershipPlanRepository implements MembershipPlanRep
 
     @Override
     public <S extends MembershipPlan> S save(S entity) {
+        Long id = idGenerator.getAndIncrement();
         if (entity.getId() == null) {
-            entity.setId(idGenerator.getAndIncrement());
+            entity.setId(id);
         }
-        db.put(idGenerator.get(), entity);
+        db.put(id, entity);
         return entity;
     }
 
@@ -113,7 +114,7 @@ public class SimpleInMemoryMembershipPlanRepository implements MembershipPlanRep
 
     @Override
     public Optional<MembershipPlan> findById(Long aLong) {
-        return Optional.empty();
+        return Optional.of(db.get(aLong));
     }
 
     @Override

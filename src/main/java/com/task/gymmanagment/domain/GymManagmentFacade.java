@@ -1,6 +1,7 @@
 package com.task.gymmanagment.domain;
 
 import com.task.gymmanagment.domain.dto.request.AddGymRequestDto;
+import com.task.gymmanagment.domain.dto.request.AddMemberRequestDto;
 import com.task.gymmanagment.domain.dto.request.AddMembershipPlanRequestDto;
 import com.task.gymmanagment.domain.dto.response.GymInfoResponseDto;
 import com.task.gymmanagment.domain.dto.response.MembershipPlanInfoResponseDto;
@@ -29,5 +30,9 @@ public class GymManagmentFacade {
 
     public List<MembershipPlanInfoResponseDto> getGymAllMembershipPlans(String gymName) {
         return managmentService.findGymAllMembershipPlans(gymName);
+    }
+
+    public Long registerMember(AddMemberRequestDto member) {
+        return managmentService.addMemberToMembershipPlan(member);
     }
 }
