@@ -59,6 +59,7 @@ class DomainMapper {
 
     static MemberDto mapMemberToDto(Member member){
         return MemberDto.builder()
+                .id(member.getId())
                 .name(member.getFullName())
                 .membershipPlan(member.getMembershipPlan().getName())
                 .status(member.getStatus())

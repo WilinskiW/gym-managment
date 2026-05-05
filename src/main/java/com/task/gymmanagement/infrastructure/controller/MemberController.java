@@ -24,7 +24,7 @@ public class MemberController {
     private final GymManagementFacade managementFacade;
 
     @PostMapping
-    public ResponseEntity<Long> addMemberToMembershipPlan(@Valid @RequestBody AddMemberRequestDto dto) {
+    public ResponseEntity<MemberDto> addMemberToMembershipPlan(@Valid @RequestBody AddMemberRequestDto dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(managementFacade.registerMember(dto));
     }
 

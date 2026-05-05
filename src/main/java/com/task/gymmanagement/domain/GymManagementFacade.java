@@ -18,7 +18,7 @@ public class GymManagementFacade {
 
     private final GymManagementService managementService;
 
-    public Long addGym(AddGymRequestDto gymRequestDto) {
+    public GymDto addGym(AddGymRequestDto gymRequestDto) {
         return managementService.createGym(gymRequestDto);
     }
 
@@ -26,7 +26,7 @@ public class GymManagementFacade {
         return managementService.findAllGyms();
     }
 
-    public Long addMembershipToGym(AddMembershipPlanRequestDto membershipPlanRequest) {
+    public MembershipPlanDto addMembershipToGym(AddMembershipPlanRequestDto membershipPlanRequest) {
         return managementService.createMembershipPlanForGym(membershipPlanRequest);
     }
 
@@ -34,7 +34,7 @@ public class GymManagementFacade {
         return managementService.findGymAllMembershipPlans(gymId);
     }
 
-    public Long registerMember(AddMemberRequestDto member) {
+    public MemberDto registerMember(AddMemberRequestDto member) {
         return managementService.addMemberToMembershipPlan(member);
     }
 

@@ -26,7 +26,7 @@ public class GymController {
     private final GymManagementFacade managementFacade;
 
     @PostMapping("/gyms")
-    public ResponseEntity<Long> addGym(@Valid @RequestBody AddGymRequestDto gymRequestDto) {
+    public ResponseEntity<GymDto> addGym(@Valid @RequestBody AddGymRequestDto gymRequestDto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(managementFacade.addGym(gymRequestDto));
     }
 
@@ -36,7 +36,7 @@ public class GymController {
     }
 
     @PostMapping("/membership-plans")
-    public ResponseEntity<Long> createMembershipPlanForGivenGym(@Valid @RequestBody
+    public ResponseEntity<MembershipPlanDto> createMembershipPlanForGivenGym(@Valid @RequestBody
                                                                 AddMembershipPlanRequestDto membershipPlanRequest) {
         return ResponseEntity.status(HttpStatus.CREATED).body(managementFacade.addMembershipToGym(membershipPlanRequest));
     }

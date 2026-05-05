@@ -5,6 +5,7 @@ import lombok.Builder;
 
 @Builder
 public record MemberDto(
+        Long id,
         String name,
         String membershipPlan,
         MemberStatus status

@@ -24,7 +24,6 @@ public class GlobalExceptionHandler {
     private static final String JSON_PARSE_ERROR_MESSAGE = "Invalid JSON format or value";
     private static final String VALIDATION_ERROR_LOG_MESSAGE = "Validation error at fields: {}";
     private static final String JSON_PARSE_LOG_MESSAGE = "JSON parse error: {}";
-    private static final String ILLEGAL_ARGUMENT_LOG_MESSAGE = "Illegal argument: {}";
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponseDto> handleGeneralException(Exception ex) {
@@ -51,13 +50,6 @@ public class GlobalExceptionHandler {
         log.warn(JSON_PARSE_LOG_MESSAGE, ex.getMessage());
         return ResponseEntity.badRequest()
                 .body(new ErrorResponseDto(HttpStatus.BAD_REQUEST.value(), JSON_PARSE_ERROR_MESSAGE));
-    }
-
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ErrorResponseDto> handleIllegalArgument(IllegalArgumentException ex) {
-        log.warn(ILLEGAL_ARGUMENT_LOG_MESSAGE, ex.getMessage());
-        return ResponseEntity.badRequest()
-                .body(new ErrorResponseDto(HttpStatus.BAD_REQUEST.value(), ex.getMessage()));
     }
 
     @ExceptionHandler({GymNotFoundException.class, MemberNotFoundException.class, MembershipPlanNotFoundException.class})

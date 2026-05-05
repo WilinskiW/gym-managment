@@ -21,6 +21,9 @@ import java.util.List;
 
 import static com.task.gymmanagement.domain.DomainMapper.mapDtoToGym;
 import static com.task.gymmanagement.domain.DomainMapper.mapDtoToMember;
+import static com.task.gymmanagement.domain.DomainMapper.mapGymToDto;
+import static com.task.gymmanagement.domain.DomainMapper.mapMemberToDto;
+import static com.task.gymmanagement.domain.DomainMapper.mapMembershipPlanToDto;
 import static com.task.gymmanagement.domain.DomainMapper.mapToMembershipPlan;
 
 @Service
@@ -32,23 +35,20 @@ class GymManagementService {
     private final MembershipPlanRepository membershipPlanRepository;
     private final MemberRepository memberRepository;
 
-    public Long createGym(AddGymRequestDto gymRequestDto) {
+    public GymDto createGym(AddGymRequestDto gymRequestDto) {
         var gymName = gymRequestDto.name().trim();
 
-        if(gymRepository.existsByName(gymName)){
+        if (gymRepository.existsByName(gymName)) {
             log.warn("Gym with name {} already exists", gymName);
             throw new GymAlreadyExistException(gymName);
         }
 
-        if(gymRequestDto.name().isBlank() || gymRequestDto.address().isBlank() || gymRequestDto.phoneNumber().isBlank()){
-            throw new IllegalArgumentException("All fields are required");
-        }
+        var gym = mapDtoToGym(gymRequestDto);
 
-        Gym gym = mapDtoToGym(gymRequestDto);
-
-        Gym addedGym = gymRepository.save(gym);
+        gymRepository.save(gym);
         log.info("Gym with name {} added successfully", gymName);
-        return addedGym.getId();
+
+        return mapGymToDto(gym);
     }
 
     @Transactional(readOnly = true)
@@ -58,17 +58,17 @@ class GymManagementService {
                 .toList();
     }
 
-    public Long createMembershipPlanForGym(AddMembershipPlanRequestDto membershipPlanRequest) {
+    public MembershipPlanDto createMembershipPlanForGym(AddMembershipPlanRequestDto membershipPlanRequest) {
         var gymId = membershipPlanRequest.gymId();
         var gym = gymRepository.findById(gymId).orElseThrow(() -> new GymNotFoundException(gymId));
 
         MembershipPlan membershipPlan = mapToMembershipPlan(gym, membershipPlanRequest);
 
-        membershipPlan = membershipPlanRepository.save(membershipPlan);
+        membershipPlanRepository.save(membershipPlan);
 
         log.info("Membership plan {} added successfully with ID: {}", membershipPlan.getName(), membershipPlan.getId());
 
-        return membershipPlan.getId();
+        return mapMembershipPlanToDto(membershipPlan);
     }
 
     @Transactional(readOnly = true)
@@ -80,25 +80,30 @@ class GymManagementService {
                 .toList();
     }
 
-    public Long addMemberToMembershipPlan(AddMemberRequestDto dto) {
+    public MemberDto addMemberToMembershipPlan(AddMemberRequestDto dto) {
+        var member = validateMembershipPlan(dto);
+        memberRepository.save(member);
+
+        log.info("Member with ID: {} successfully added to Membership plan with ID: {}",
+                member.getId(), dto.membershipId());
+
+        return mapMemberToDto(member);
+    }
+
+    private Member validateMembershipPlan(AddMemberRequestDto dto) {
         var membershipPlanId = dto.membershipId();
+
         var membershipPlan = membershipPlanRepository.findById(membershipPlanId)
-                        .orElseThrow(() -> new MembershipPlanNotFoundException(membershipPlanId));
+                .orElseThrow(() -> new MembershipPlanNotFoundException(membershipPlanId));
 
         var membersCount = memberRepository.countActiveMembersByMembershipPlan(membershipPlan);
         var maxMembers = membershipPlan.getMaxMembers();
 
-        if(membersCount >= maxMembers){
+        if (membersCount >= maxMembers) {
             throw new MembershipPlanExceedLimitException(maxMembers, membershipPlanId);
         }
 
-        var member = mapDtoToMember(dto, membershipPlan);
-        member = memberRepository.save(member);
-
-        log.info("Member with ID: {} successfully added to Membership plan with ID: {}",
-                member.getId(), membershipPlanId);
-
-        return member.getId();
+        return mapDtoToMember(dto, membershipPlan);
     }
 
     @Transactional(readOnly = true)

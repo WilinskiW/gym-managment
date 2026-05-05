@@ -46,10 +46,10 @@ public class GymManagementFacadeTest {
                 .build();
 
         // when
-        Long addedId = facade.addGym(request);
+        var dto = facade.addGym(request);
 
         // then
-        assertThat(addedId).isEqualTo(1);
+        assertThat(dto.id()).isEqualTo(1);
     }
 
     @Test
@@ -73,21 +73,6 @@ public class GymManagementFacadeTest {
                 .address("Test address")
                 .phoneNumber("123456789")
                 .build();
-    }
-
-    @Test
-    void should_throw_exception_when_address_is_blank() {
-        // given
-        var request = AddGymRequestDto.builder()
-                .name("Test gym")
-                .address("   ")
-                .phoneNumber("123456789")
-                .build();
-
-        // when & then
-        assertThatThrownBy(() -> facade.addGym(request))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("All fields are required");
     }
 
     @Test
@@ -123,10 +108,10 @@ public class GymManagementFacadeTest {
                 .build();
 
         // when
-        Long addedMembershipId = facade.addMembershipToGym(membershipPlanRequest);
+        var dto = facade.addMembershipToGym(membershipPlanRequest);
 
         // then
-        assertThat(addedMembershipId).isEqualTo(1);
+        assertThat(dto.id()).isEqualTo(1);
     }
 
     @Test
@@ -223,12 +208,12 @@ public class GymManagementFacadeTest {
                 .build();
 
         // when
-        Long member1Id = facade.registerMember(member1);
-        Long member2Id = facade.registerMember(member2);
+        var memberDto1 = facade.registerMember(member1);
+        var memberDto2 = facade.registerMember(member2);
 
         // then
-        assertThat(member1Id).isEqualTo(1);
-        assertThat(member2Id).isEqualTo(2);
+        assertThat(memberDto1.id()).isEqualTo(1);
+        assertThat(memberDto2.id()).isEqualTo(2);
     }
 
     @Test
