@@ -3,6 +3,7 @@ package com.task.gymmanagement.infrastructure;
 import com.task.gymmanagement.domain.GymManagementFacade;
 import com.task.gymmanagement.domain.dto.request.AddGymRequestDto;
 import com.task.gymmanagement.domain.dto.response.GymDto;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,17 +15,17 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/gym")
+@RequestMapping("/api/gyms")
 @RequiredArgsConstructor
 public class GymManagementController {
     private final GymManagementFacade managementFacade;
 
     @PostMapping
-    public ResponseEntity<Long> addGym(@RequestBody AddGymRequestDto gymRequestDto) {
+    public ResponseEntity<Long> addGym(@Valid @RequestBody AddGymRequestDto gymRequestDto) {
         return ResponseEntity.ok(managementFacade.addGym(gymRequestDto));
     }
 
-    @GetMapping("/all")
+    @GetMapping
     public ResponseEntity<List<GymDto>> getAllGyms() {
         return ResponseEntity.ok(managementFacade.getAllGyms());
     }
