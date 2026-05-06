@@ -3,6 +3,7 @@ package feature;
 import com.task.gymmanagement.domain.MemberStatus;
 import com.task.gymmanagement.domain.dto.response.MemberDto;
 import com.task.gymmanagement.infrastructure.error.ValidationErrorResponseDto;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
@@ -14,6 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class MemberControllerIntegrationTest extends BaseIntegrationTest{
 
     @Test
+    @DisplayName("Should list all members")
     void should_list_all_members() {
         // given
         givenGymExists();
@@ -35,6 +37,7 @@ public class MemberControllerIntegrationTest extends BaseIntegrationTest{
     }
 
     @Test
+    @DisplayName("Should return error when validation failed while adding member")
     void should_return_error_when_validation_failed_while_adding_member() {
         // given
         var request = """
@@ -58,6 +61,7 @@ public class MemberControllerIntegrationTest extends BaseIntegrationTest{
     }
 
     @Test
+    @DisplayName("Should register new member")
     void should_register_new_member() {
         // given
         givenGymExists();
@@ -82,6 +86,7 @@ public class MemberControllerIntegrationTest extends BaseIntegrationTest{
     }
 
     @Test
+    @DisplayName("Should cancel membership")
     void should_cancel_membership() {
         // given
         givenGymExists();
