@@ -322,9 +322,9 @@ public class GymControllerIntegrationTest extends BaseIntegrationTest {
                     .exchange()
                     .expectStatus().isOk()
                     .expectBody(new ParameterizedTypeReference<List<RevenueReportDto>>() {})
-                    .value(report -> {
-                        assertThat(report).allMatch(r -> r.amount().compareTo(BigDecimal.ZERO) == 0);
-                    });
+                    .value(report ->
+                            assertThat(report).allMatch(r -> r.amount().compareTo(BigDecimal.ZERO) == 0)
+                    );
         }
 
         @Test
@@ -347,6 +347,17 @@ public class GymControllerIntegrationTest extends BaseIntegrationTest {
                         assertThat(plans).extracting(MembershipPlanDto::name)
                                 .containsExactlyInAnyOrder("Standard", "Premium");
                     });
+        }
+
+        @Test
+        @DisplayName("Should return empty list when no gyms exist for revenue report")
+        void should_return_empty_list_when_no_data_for_revenue_report() {
+            testClient.get()
+                    .uri("/api/reports/revenue")
+                    .exchange()
+                    .expectStatus().isOk()
+                    .expectBody(new ParameterizedTypeReference<List<RevenueReportDto> >() {})
+                    .value(report -> assertThat(report).isEmpty());
         }
     }
 }

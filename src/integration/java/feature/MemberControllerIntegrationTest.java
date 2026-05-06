@@ -91,7 +91,7 @@ public class MemberControllerIntegrationTest extends BaseIntegrationTest {
 
     @Test
     @DisplayName("Should return error when trying to add member when already exists in gym")
-    void should_return_error_when_trying_to_add_member_when_already_exists_in_gym(){
+    void should_return_error_when_trying_to_add_member_when_already_exists_in_gym() {
         // given
         givenGymExists();
         givenMembershipPlanExists();
@@ -170,5 +170,66 @@ public class MemberControllerIntegrationTest extends BaseIntegrationTest {
                                 "Member with ID: 1 not found")
                         )
                 );
+    }
+
+    @Test
+    @DisplayName("Should allow to register again with same email if previous membership was cancelled")
+    void should_allow_register_again_after_cancellation() {
+        // given
+        givenGymExists();
+        givenMembershipPlanExists();
+        givenMemberExists(1L, "Jan", "jan@test.pl");
+
+        // when
+        testClient.patch().uri("/api/members/1/cancel").exchange().expectStatus().isNoContent();
+
+        // then
+        var request = """
+                {
+                    "membershipId": 1,
+                    "fullName": "Jan",
+                    "email": "jan@test.pl"
+                }
+                """;
+
+        testClient.post()
+                .uri("/api/members")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(request)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(MemberDto.class)
+                .value(dto -> {
+                    assertThat(dto.id()).isEqualTo(2L);
+                    assertThat(dto.status()).isEqualTo(MemberStatus.ACTIVE);
+                });
+    }
+
+    @Test
+    @DisplayName("Should allow register when member has active plan at different gym")
+    void should_allow_register_when_member_has_active_plan_at_different_gym() {
+        // given
+        givenGymExists();
+        givenGymExists("Second gym", "Addr 2");
+        givenMembershipPlanExists();
+        givenMembershipPlanExists(2L, "Basic plan", 100, "PLN");
+        givenMemberExists(1L, "Jan Kowalski", "jan@test.pl");
+
+        var request = """
+                {
+                    "membershipId": 2,
+                    "fullName": "Jan Kowalski",
+                    "email": "jan@test.pl"
+                }
+                """;
+
+        // when
+        testClient.post().uri("/api/members")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(request)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(MemberDto.class)
+                .isEqualTo(new MemberDto(2L, "Jan Kowalski", "Basic plan", MemberStatus.ACTIVE));
     }
 }
