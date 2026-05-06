@@ -1,4 +1,4 @@
-package com.task.gymmanagement.domain.exception;
+package com.task.gymmanagement.domain.exception.gym;
 
 public class GymNotFoundException extends RuntimeException {
     private final static String DEFAULT_MESSAGE = "Gym with ID: %d not found";

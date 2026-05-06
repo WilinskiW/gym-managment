@@ -7,13 +7,13 @@ import com.task.gymmanagement.domain.dto.response.GymDto;
 import com.task.gymmanagement.domain.dto.response.MemberDto;
 import com.task.gymmanagement.domain.dto.response.MembershipPlanDto;
 import com.task.gymmanagement.domain.dto.response.RevenueReportDto;
-import com.task.gymmanagement.domain.exception.GymAlreadyExistException;
-import com.task.gymmanagement.domain.exception.GymNotFoundException;
-import com.task.gymmanagement.domain.exception.MemberAlreadyExistsInGymException;
-import com.task.gymmanagement.domain.exception.MemberNotFoundException;
-import com.task.gymmanagement.domain.exception.MembershipPlanAlreadyCancelledException;
-import com.task.gymmanagement.domain.exception.MembershipPlanExceedLimitException;
-import com.task.gymmanagement.domain.exception.MembershipPlanNotFoundException;
+import com.task.gymmanagement.domain.exception.gym.GymAlreadyExistsException;
+import com.task.gymmanagement.domain.exception.gym.GymNotFoundException;
+import com.task.gymmanagement.domain.exception.member.MemberAlreadyExistsInGymException;
+import com.task.gymmanagement.domain.exception.member.MemberNotFoundException;
+import com.task.gymmanagement.domain.exception.membership.MembershipPlanAlreadyCancelledException;
+import com.task.gymmanagement.domain.exception.membership.MembershipPlanExceedLimitException;
+import com.task.gymmanagement.domain.exception.membership.MembershipPlanNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -158,7 +158,7 @@ public class GymManagementFacadeTest {
 
             // then
             assertThatThrownBy(() -> facade.addGym(secondRequest))
-                    .isInstanceOf(GymAlreadyExistException.class)
+                    .isInstanceOf(GymAlreadyExistsException.class)
                     .hasMessage("Gym with name Test gym already exists");
         }
 

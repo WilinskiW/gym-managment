@@ -1,12 +1,12 @@
 package com.task.gymmanagement.infrastructure.error;
 
-import com.task.gymmanagement.domain.exception.GymAlreadyExistException;
-import com.task.gymmanagement.domain.exception.GymNotFoundException;
-import com.task.gymmanagement.domain.exception.MemberAlreadyExistsInGymException;
-import com.task.gymmanagement.domain.exception.MemberNotFoundException;
-import com.task.gymmanagement.domain.exception.MembershipPlanAlreadyCancelledException;
-import com.task.gymmanagement.domain.exception.MembershipPlanExceedLimitException;
-import com.task.gymmanagement.domain.exception.MembershipPlanNotFoundException;
+import com.task.gymmanagement.domain.exception.gym.GymAlreadyExistsException;
+import com.task.gymmanagement.domain.exception.gym.GymNotFoundException;
+import com.task.gymmanagement.domain.exception.member.MemberAlreadyExistsInGymException;
+import com.task.gymmanagement.domain.exception.member.MemberNotFoundException;
+import com.task.gymmanagement.domain.exception.membership.MembershipPlanAlreadyCancelledException;
+import com.task.gymmanagement.domain.exception.membership.MembershipPlanExceedLimitException;
+import com.task.gymmanagement.domain.exception.membership.MembershipPlanNotFoundException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -74,7 +74,7 @@ public class GlobalExceptionHandler {
         return handleException(ex, HttpStatus.CONFLICT);
     }
 
-    @ExceptionHandler(GymAlreadyExistException.class)
+    @ExceptionHandler(GymAlreadyExistsException.class)
     public ResponseEntity<ErrorResponseDto> handleGymAlreadyExistException(RuntimeException ex) {
         return handleException(ex, HttpStatus.CONFLICT);
     }

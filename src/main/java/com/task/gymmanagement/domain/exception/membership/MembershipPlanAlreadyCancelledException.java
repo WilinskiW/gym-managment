@@ -1,4 +1,4 @@
-package com.task.gymmanagement.domain.exception;
+package com.task.gymmanagement.domain.exception.membership;
 
 public class MembershipPlanAlreadyCancelledException extends RuntimeException {
     private final static String DEFAULT_MESSAGE = "Member with ID: %d is already cancelled";
