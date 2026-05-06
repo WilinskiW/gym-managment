@@ -10,6 +10,7 @@ import com.task.gymmanagement.domain.dto.response.RevenueReportDto;
 import com.task.gymmanagement.domain.exception.GymAlreadyExistException;
 import com.task.gymmanagement.domain.exception.GymNotFoundException;
 import com.task.gymmanagement.domain.exception.MemberNotFoundException;
+import com.task.gymmanagement.domain.exception.MembershipPlanAlreadyCancelledException;
 import com.task.gymmanagement.domain.exception.MembershipPlanExceedLimitException;
 import com.task.gymmanagement.domain.exception.MembershipPlanNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -356,6 +357,19 @@ public class GymManagementFacadeTest {
                     .singleElement()
                     .extracting(MemberDto::status)
                     .isEqualTo(MemberStatus.CANCELLED);
+        }
+
+        @Test
+        @DisplayName("Should throw exception when trying to cancel member who was already cancelled")
+        void should_throw_exception_when_trying_to_cancel_member_who_was_already_cancelled(){
+            // given
+            givenMemberExists();
+            facade.cancelMembership(FIRST_MEMBER_ID);
+
+            // when & then
+            assertThatThrownBy(() -> facade.cancelMembership(FIRST_MEMBER_ID))
+                    .isInstanceOf(MembershipPlanAlreadyCancelledException.class)
+                    .hasMessage("Member with ID: 1 is already cancelled");
         }
 
         @Test

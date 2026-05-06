@@ -3,6 +3,7 @@ package com.task.gymmanagement.infrastructure.error;
 import com.task.gymmanagement.domain.exception.GymAlreadyExistException;
 import com.task.gymmanagement.domain.exception.GymNotFoundException;
 import com.task.gymmanagement.domain.exception.MemberNotFoundException;
+import com.task.gymmanagement.domain.exception.MembershipPlanAlreadyCancelledException;
 import com.task.gymmanagement.domain.exception.MembershipPlanExceedLimitException;
 import com.task.gymmanagement.domain.exception.MembershipPlanNotFoundException;
 import lombok.extern.log4j.Log4j2;
@@ -57,9 +58,14 @@ public class GlobalExceptionHandler {
         return handleException(ex, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler({MembershipPlanExceedLimitException.class})
+    @ExceptionHandler(MembershipPlanExceedLimitException.class)
     public ResponseEntity<ErrorResponseDto> handleMembershipPlanExceedLimitException(RuntimeException ex) {
         return handleException(ex, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MembershipPlanAlreadyCancelledException.class)
+    public ResponseEntity<ErrorResponseDto> handleMembershipPlanAlreadyCancelledException(RuntimeException ex) {
+        return handleException(ex, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(GymAlreadyExistException.class)

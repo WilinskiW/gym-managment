@@ -2,10 +2,12 @@ package feature;
 
 import com.task.gymmanagement.domain.MemberStatus;
 import com.task.gymmanagement.domain.dto.response.MemberDto;
+import com.task.gymmanagement.infrastructure.error.ErrorResponseDto;
 import com.task.gymmanagement.infrastructure.error.ValidationErrorResponseDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 
 import java.util.List;
@@ -98,5 +100,28 @@ public class MemberControllerIntegrationTest extends BaseIntegrationTest{
                 .uri("/api/members/1/cancel")
                 .exchange()
                 .expectStatus().isNoContent();
+    }
+
+    @Test
+    @DisplayName("Should return error when trying to cancelled member who was cancelled before")
+    void should_return_error_when_trying_to_cancelled_member_who_was_cancelled_before(){
+        //given
+        givenGymExists();
+        givenMembershipPlanExists();
+        givenMemberExists();
+
+        testClient.patch().uri("/api/members/1/cancel").exchange();
+
+        // when & then
+        testClient.patch().uri("/api/members/1/cancel")
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.CONFLICT)
+                .expectBody(ErrorResponseDto.class)
+                .value(body -> assertThat(body)
+                        .isEqualTo(new ErrorResponseDto(HttpStatus.CONFLICT.value(),
+                                "Member with ID: 1 is already cancelled")
+                        )
+                );
+
     }
 }

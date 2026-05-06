@@ -10,6 +10,7 @@ import com.task.gymmanagement.domain.dto.response.RevenueReportDto;
 import com.task.gymmanagement.domain.exception.GymAlreadyExistException;
 import com.task.gymmanagement.domain.exception.GymNotFoundException;
 import com.task.gymmanagement.domain.exception.MemberNotFoundException;
+import com.task.gymmanagement.domain.exception.MembershipPlanAlreadyCancelledException;
 import com.task.gymmanagement.domain.exception.MembershipPlanExceedLimitException;
 import com.task.gymmanagement.domain.exception.MembershipPlanNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -117,6 +118,11 @@ class GymManagementService {
 
     public void changeMemberStatusToCancel(Long memberId) {
         var member = memberRepository.findById(memberId).orElseThrow(() -> new MemberNotFoundException(memberId));
+
+        if (member.isMemberAlreadyCancelled()) {
+            throw new MembershipPlanAlreadyCancelledException(memberId);
+        }
+
         member.cancel();
         memberRepository.save(member);
 

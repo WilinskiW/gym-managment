@@ -57,4 +57,8 @@ class Member {
     void cancel(){
         this.status = MemberStatus.CANCELLED;
     }
+
+    boolean isMemberAlreadyCancelled() {
+        return this.status.equals(MemberStatus.CANCELLED);
+    }
 }
