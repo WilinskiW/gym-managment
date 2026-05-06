@@ -1,16 +1,16 @@
 package com.task.gymmanagement.domain.dto.request;
 
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
 
 @Builder
 public record AddMemberRequestDto(
         @NotNull(message = "Membership ID is required")
-        @Min(value = 1, message = "Membership ID must be greater than 0")
+        @Positive(message = "Membership ID must be greater than 0")
         Long membershipId,
 
         @NotBlank(message = "Full name cannot be empty")

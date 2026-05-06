@@ -2,9 +2,9 @@ package com.task.gymmanagement.domain.dto.request;
 
 import com.task.gymmanagement.domain.MembershipType;
 import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
 
@@ -28,14 +28,14 @@ public record AddMembershipPlanRequestDto(
         String currency,
 
         @NotNull(message = "Duration is required")
-        @Min(value = 1, message = "Duration must be at least 1 month")
+        @Positive(message = "Duration must be at least 1 month")
         Integer duration,
 
         @NotNull(message = "Max members is required")
-        @Min(value = 1, message = "Max members must be at least 1")
+        @Positive(message = "Max members must be at least 1")
         Integer maxMembers,
 
         @NotNull(message = "Gym ID is required")
-        @Min(value = 1, message = "Gym ID must be greater than 0")
+        @Positive(message = "Gym ID must be greater than 0")
         Long gymId
 ) {}
