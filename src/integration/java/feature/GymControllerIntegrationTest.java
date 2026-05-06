@@ -306,6 +306,26 @@ public class GymControllerIntegrationTest extends BaseIntegrationTest {
                     });
         }
 
+        @Test
+        @DisplayName("Should not include cancelled members in revenue report")
+        void should_not_include_cancelled_members_in_revenue_report() {
+            // given
+            givenGymExists("Revenue Gym", "Addr");
+            givenMembershipPlanExists(1L, "Gold", 500, "PLN");
+            givenMemberExists(1L, "John Doe", "john@test.pl");
+
+            // when
+            testClient.patch().uri("/api/members/1/cancel").exchange().expectStatus().isNoContent();
+
+            // then
+            testClient.get().uri("/api/reports/revenue")
+                    .exchange()
+                    .expectStatus().isOk()
+                    .expectBody(new ParameterizedTypeReference<List<RevenueReportDto>>() {})
+                    .value(report -> {
+                        assertThat(report).allMatch(r -> r.amount().compareTo(BigDecimal.ZERO) == 0);
+                    });
+        }
 
         @Test
         @DisplayName("Should list all membership plans for given gym")

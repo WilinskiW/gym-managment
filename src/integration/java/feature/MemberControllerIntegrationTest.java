@@ -14,7 +14,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class MemberControllerIntegrationTest extends BaseIntegrationTest{
+public class MemberControllerIntegrationTest extends BaseIntegrationTest {
 
     @Test
     @DisplayName("Should list all members")
@@ -30,7 +30,8 @@ public class MemberControllerIntegrationTest extends BaseIntegrationTest{
                 .uri("/api/members")
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody(new ParameterizedTypeReference<List<MemberDto>>() {})
+                .expectBody(new ParameterizedTypeReference<List<MemberDto>>() {
+                })
                 .value(members -> {
                     assertThat(members).hasSize(2);
                     assertThat(members).extracting(MemberDto::name)
@@ -43,12 +44,12 @@ public class MemberControllerIntegrationTest extends BaseIntegrationTest{
     void should_return_error_when_validation_failed_while_adding_member() {
         // given
         var request = """
-            {
-                "membershipId": 1,
-                "fullName": "",
-                "email": "not-an-email"
-            }
-            """;
+                {
+                    "membershipId": 1,
+                    "fullName": "",
+                    "email": "not-an-email"
+                }
+                """;
 
         // when & then
         testClient.post()
@@ -104,7 +105,7 @@ public class MemberControllerIntegrationTest extends BaseIntegrationTest{
 
     @Test
     @DisplayName("Should return error when trying to cancelled member who was cancelled before")
-    void should_return_error_when_trying_to_cancelled_member_who_was_cancelled_before(){
+    void should_return_error_when_trying_to_cancelled_member_who_was_cancelled_before() {
         //given
         givenGymExists();
         givenMembershipPlanExists();
@@ -123,5 +124,20 @@ public class MemberControllerIntegrationTest extends BaseIntegrationTest{
                         )
                 );
 
+    }
+
+    @Test
+    @DisplayName("Should return error when trying to cancel non-existing member")
+    void should_return_error_when_trying_to_cancel_non_existing_member() {
+        // when & then
+        testClient.patch().uri("/api/members/1/cancel")
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody(ErrorResponseDto.class)
+                .value(body -> assertThat(body)
+                        .isEqualTo(new ErrorResponseDto(HttpStatus.NOT_FOUND.value(),
+                                "Member with ID: 1 not found")
+                        )
+                );
     }
 }
