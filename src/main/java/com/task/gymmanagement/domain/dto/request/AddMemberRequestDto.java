@@ -9,6 +9,7 @@ import lombok.Builder;
 @Builder
 public record AddMemberRequestDto(
         @NotNull(message = "Membership ID is required")
+        @Size(min = 1, message = "Membership ID must be greater than 0")
         Long membershipId,
 
         @NotBlank(message = "Full name cannot be empty")
