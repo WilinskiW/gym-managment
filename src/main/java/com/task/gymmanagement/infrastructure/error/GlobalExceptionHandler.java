@@ -2,6 +2,7 @@ package com.task.gymmanagement.infrastructure.error;
 
 import com.task.gymmanagement.domain.exception.GymAlreadyExistException;
 import com.task.gymmanagement.domain.exception.GymNotFoundException;
+import com.task.gymmanagement.domain.exception.MemberAlreadyExistsInGymException;
 import com.task.gymmanagement.domain.exception.MemberNotFoundException;
 import com.task.gymmanagement.domain.exception.MembershipPlanAlreadyCancelledException;
 import com.task.gymmanagement.domain.exception.MembershipPlanExceedLimitException;
@@ -65,6 +66,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MembershipPlanAlreadyCancelledException.class)
     public ResponseEntity<ErrorResponseDto> handleMembershipPlanAlreadyCancelledException(RuntimeException ex) {
+        return handleException(ex, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(MemberAlreadyExistsInGymException.class)
+    public ResponseEntity<ErrorResponseDto> handleMemberAlreadyExistsInGymException(RuntimeException ex) {
         return handleException(ex, HttpStatus.CONFLICT);
     }
 

@@ -9,6 +9,7 @@ import com.task.gymmanagement.domain.dto.response.MembershipPlanDto;
 import com.task.gymmanagement.domain.dto.response.RevenueReportDto;
 import com.task.gymmanagement.domain.exception.GymAlreadyExistException;
 import com.task.gymmanagement.domain.exception.GymNotFoundException;
+import com.task.gymmanagement.domain.exception.MemberAlreadyExistsInGymException;
 import com.task.gymmanagement.domain.exception.MemberNotFoundException;
 import com.task.gymmanagement.domain.exception.MembershipPlanAlreadyCancelledException;
 import com.task.gymmanagement.domain.exception.MembershipPlanExceedLimitException;
@@ -300,6 +301,25 @@ public class GymManagementFacadeTest {
             assertThatThrownBy(() -> facade.registerMember(member))
                     .isInstanceOf(MembershipPlanNotFoundException.class)
                     .hasMessage("Membership plan with ID: 1 not found");
+        }
+
+        @Test
+        @DisplayName("Should throw exception when adding member with existing email in gym")
+        void should_throw_exception_when_adding_member_with_existing_email_in_gym() {
+            // given
+            givenMembershipPlanExists();
+
+            var member = memberRequest(
+                    FIRST_MEMBERSHIP_PLAN_ID,
+                    "Jan Kowalski",
+                    "test@gmail.com"
+            );
+
+            facade.registerMember(member);
+            // when & then
+            assertThatThrownBy(() -> facade.registerMember(member))
+                    .isInstanceOf(MemberAlreadyExistsInGymException.class)
+                    .hasMessage("Member with email and active plan: test@gmail.com already exists in gym: Test gym (ID: 1)");
         }
 
         @Test

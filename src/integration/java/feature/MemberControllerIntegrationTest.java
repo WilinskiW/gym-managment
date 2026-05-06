@@ -88,6 +88,37 @@ public class MemberControllerIntegrationTest extends BaseIntegrationTest {
                 .isEqualTo(new MemberDto(1L, "Jan Kowalski", "Default Plan", MemberStatus.ACTIVE));
     }
 
+
+    @Test
+    @DisplayName("Should return error when trying to add member when already exists in gym")
+    void should_return_error_when_trying_to_add_member_when_already_exists_in_gym(){
+        // given
+        givenGymExists();
+        givenMembershipPlanExists();
+        givenMemberExists();
+
+        var request = """
+                {
+                    "membershipId": 1,
+                    "fullName": "Jan Kowalski",
+                    "email": "default@test.com"
+                }
+                """;
+
+        testClient.post().uri("/api/members").body(request).exchange();
+
+        // when & then
+        testClient.post()
+                .uri("/api/members")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(request)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.CONFLICT)
+                .expectBody(ErrorResponseDto.class)
+                .isEqualTo(new ErrorResponseDto(HttpStatus.CONFLICT.value(),
+                        "Member with email and active plan: default@test.com already exists in gym: Power gym (ID: 1)"));
+    }
+
     @Test
     @DisplayName("Should cancel membership")
     void should_cancel_membership() {

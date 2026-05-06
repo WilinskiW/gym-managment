@@ -52,6 +52,13 @@ class SimpleInMemoryMemberRepository implements MemberRepository {
                 .toList();
     }
 
+    @Override
+    public List<Member> findAllByEmail(String email) {
+        return db.values().stream()
+                .filter(m -> m.getEmail().equals(email))
+                .toList();
+    }
+
     private record GroupKey(String gymName, String currencyCode) {
     }
 

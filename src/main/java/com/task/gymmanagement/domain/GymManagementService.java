@@ -9,6 +9,7 @@ import com.task.gymmanagement.domain.dto.response.MembershipPlanDto;
 import com.task.gymmanagement.domain.dto.response.RevenueReportDto;
 import com.task.gymmanagement.domain.exception.GymAlreadyExistException;
 import com.task.gymmanagement.domain.exception.GymNotFoundException;
+import com.task.gymmanagement.domain.exception.MemberAlreadyExistsInGymException;
 import com.task.gymmanagement.domain.exception.MemberNotFoundException;
 import com.task.gymmanagement.domain.exception.MembershipPlanAlreadyCancelledException;
 import com.task.gymmanagement.domain.exception.MembershipPlanExceedLimitException;
@@ -83,11 +84,16 @@ class GymManagementService {
 
     public MemberDto addMemberToMembershipPlan(AddMemberRequestDto dto) {
         var membershipPlanId = dto.membershipId();
-        var membershipPlan = getMembershipPlanOrThrow(membershipPlanId);
+        var plan = getMembershipPlanOrThrow(membershipPlanId);
 
-        validateMembershipPlanCapacity(membershipPlan, membershipPlanId);
 
-        var member = memberRepository.save(mapDtoToMember(dto, membershipPlan));
+        if (isEmailActiveInThisGym(dto, plan)) {
+            throw new MemberAlreadyExistsInGymException(dto.email(), plan.getGym().getName(), plan.getGym().getId());
+        }
+
+        validateMembershipPlanCapacity(plan, membershipPlanId);
+
+        var member = memberRepository.save(mapDtoToMember(dto, plan));
 
         log.info("Member with ID: {} successfully added to Membership plan with ID: {}",
                 member.getId(), dto.membershipId());
@@ -95,7 +101,15 @@ class GymManagementService {
         return mapMemberToDto(member);
     }
 
-    private MembershipPlan getMembershipPlanOrThrow(Long membershipPlanId){
+    private boolean isEmailActiveInThisGym(AddMemberRequestDto dto, MembershipPlan plan) {
+        return memberRepository.findAllByEmail(dto.email()).stream()
+                .anyMatch(m ->
+                        m.getMembershipPlan().getGym().getId().equals(plan.getGym().getId())
+                                && m.getStatus() == MemberStatus.ACTIVE
+                );
+    }
+
+    private MembershipPlan getMembershipPlanOrThrow(Long membershipPlanId) {
         return membershipPlanRepository.findById(membershipPlanId)
                 .orElseThrow(() -> new MembershipPlanNotFoundException(membershipPlanId));
     }

@@ -23,4 +23,6 @@ interface MemberRepository extends JpaRepository<Member, Long> {
                 GROUP BY p.gym.name, p.currency
             """)
     List<RevenueReportDto> calculateRevenueReport();
+
+    List<Member> findAllByEmail(String email);
 }
