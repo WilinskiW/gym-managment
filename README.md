@@ -62,3 +62,42 @@ Main source packages are inspired by Domain-Driven Design principles:
 ```
 ./mvnw spring-boot:run
 ```
+
+## Sample queries
+
+### Swagger
+
+Use Swagger to test REST API. 
+
+### Example bodies for POST Requests
+
+#### Add new gym
+```json
+{
+  "name": "Power Gym",
+  "address": "Lincoln street 49, New York",
+  "phoneNumber": "531-233-7223"
+}
+```
+
+#### Add new membership plan to gym
+```json
+{
+  "name": "Fit Fast",
+  "type": "PREMIUM",
+  "amount": 100,
+  "currency": "USD",
+  "duration": 1,
+  "maxMembers": 1,
+  "gymId": 1
+}
+```
+#### Add new member to membership plan
+```json
+{
+  "membershipId": 5,
+  "fullName": "Joe Doe",
+  "email": "joedoe@doemail.com"
+}
+```
+
